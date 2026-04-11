@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GGG MAS — Use Case Diagram | Visual Paradigm Reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0f2f5;font-family:'IBM Plex Sans',sans-serif;overflow:hidden;height:100vh;user-select:none}
+
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:48px;
+  background:#1a2e4a;color:white;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+  border-bottom:2px solid #2563eb;
+}
+#topbar h1{font-size:13px;font-weight:600;letter-spacing:.02em}
+#topbar p{font-size:11px;color:#94b4d4}
+
+#canvas{
+  position:fixed;top:48px;left:0;right:310px;bottom:0;
+  overflow:hidden;cursor:grab;background:#eef1f6;
+}
+#canvas.panning{cursor:grabbing}
+#world{
+  position:absolute;transform-origin:0 0;
+  width:4200px;height:3200px;
+}
+
+/* Arrow SVG */
+#arrows{
+  position:absolute;top:0;left:0;
+  width:4200px;height:3200px;
+  pointer-events:none;overflow:visible;
+}
+
+/* SYSTEM BOUNDARY */
+.system-boundary{
+  position:absolute;
+  border:2.5px solid #1e3a5f;
+  border-radius:12px;
+  background:rgba(219,234,254,0.18);
+}
+.system-label{
+  position:absolute;
+  font-size:13px;font-weight:700;
+  color:#1e3a5f;
+  background:#dbeafe;
+  padding:3px 10px;
+  border-radius:4px;
+  letter-spacing:.04em;
+}
+
+/* USE CASE ELLIPSES */
+.uc{
+  position:absolute;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;
+  cursor:move;
+}
+.uc ellipse{
+  fill:#fff;
+  stroke:#1e3a5f;
+  stroke-width:1.8;
+  transition:fill .15s, stroke-width .15s;
+}
+.uc:hover ellipse{fill:#eff6ff;stroke-width:2.5;stroke:#2563eb}
+.uc.dragging ellipse{fill:#dbeafe;stroke:#2563eb;stroke-width:2.5}
+.uc text{
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:10px;font-weight:500;
+  fill:#1e293b;
+  pointer-events:none;
+}
+.uc svg{overflow:visible;cursor:move}
+
+/* ACTOR */
+.actor{
+  position:absolute;
+  display:flex;flex-direction:column;align-items:center;
+  cursor:move;gap:3px;
+}
+.actor svg{overflow:visible}
+.actor-label{
+  font-size:10px;font-weight:600;
+  color:#1e293b;text-align:center;
+  max-width:90px;line-height:1.25;
+  pointer-events:none;
+}
+.actor:hover .actor-label{color:#2563eb}
+
+/* SIDEBAR */
+#side{
+  position:fixed;top:48px;right:0;width:310px;bottom:0;
+  background:#fff;border-left:1px solid #e2e8f0;
+  overflow-y:auto;padding:14px;z-index:150;
+}
+#side h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:#6b7280;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f1f5f9}
+#side h3{font-size:12px;font-weight:600;color:#1e3a5f;margin:12px 0 6px}
+
+.lr{display:flex;align-items:flex-start;gap:8px;margin-bottom:9px}
+.li{flex-shrink:0;width:52px;height:20px;display:flex;align-items:center}
+.lt .ln{font-size:11px;font-weight:600;color:#374151}
+.lt .ld{font-size:10px;color:#6b7280;line-height:1.3;margin-top:2px}
+.lt .lv{font-size:9px;color:#6d28d9;margin-top:2px;font-style:italic}
+
+.uc-entry{padding:5px 7px;border-radius:6px;margin-bottom:5px;border-left:3px solid transparent;cursor:pointer;transition:background .1s}
+.uc-entry:hover{background:#f8fafc}
+.uc-entry .uc-id{font-size:9.5px;font-weight:700;color:#64748b;font-family:'IBM Plex Mono',monospace}
+.uc-entry .uc-name{font-size:11px;font-weight:600;color:#1e293b;margin:1px 0}
+.uc-entry .uc-fr{font-size:9.5px;color:#0369a1}
+.uc-entry.uc-sales{border-left-color:#1e3a5f}
+.uc-entry.uc-demo{border-left-color:#0369a1}
+.uc-entry.uc-report{border-left-color:#7c3aed}
+.uc-entry.uc-access{border-left-color:#0f766e}
+
+#controls{position:fixed;bottom:12px;left:8px;z-index:300;display:flex;gap:6px}
+.cb{background:#fff;border:1px solid #d1d5db;border-radius:6px;
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;color:#374151;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.cb:hover{background:#f1f5f9}
+
+.badge{display:inline-block;font-size:9px;font-weight:700;border-radius:3px;padding:1px 5px;margin-left:4px;vertical-align:middle}
+.b-inc{background:#dbeafe;color:#1d4ed8}
+.b-ext{background:#fce7f3;color:#9d174d}
+.b-gen{background:#f3e8ff;color:#6b21a8}
+
+/* Tooltip */
+#tooltip{
+  position:fixed;background:#1e293b;color:#e2e8f0;
+  font-size:10.5px;padding:7px 10px;border-radius:6px;
+  pointer-events:none;z-index:500;max-width:220px;
+  line-height:1.5;display:none;
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div>
+    <h1>⚙ GGG Microtransaction Analytics System — Use Case Diagram v2</h1>
+    <p>Drag any element to reposition • Scroll/pinch to zoom • Visual Paradigm Reference</p>
+  </div>
+  <p style="font-size:11px;color:#94b4d4">ENSE706 | Phase 1 Assessment</p>
+</div>
+
+<div id="canvas">
+<div id="world">
+
+<!-- SVG Arrow Layer -->
+<svg id="arrows" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <!-- Association (plain line, open arrowhead for actor→UC) -->
+  <marker id="m-assoc" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M1,1 L9,4 L1,7" fill="none" stroke="#374151" stroke-width="1.5"/>
+  </marker>
+  <!-- Include arrow (dashed, open arrowhead) -->
+  <marker id="m-include" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M1,1 L9,4 L1,7" fill="none" stroke="#1d4ed8" stroke-width="1.5"/>
+  </marker>
+  <!-- Extend arrow (dashed, open arrowhead) -->
+  <marker id="m-extend" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M1,1 L9,4 L1,7" fill="none" stroke="#9d174d" stroke-width="1.5"/>
+  </marker>
+  <!-- Generalisation (solid line, hollow triangle) -->
+  <marker id="m-gen" markerWidth="14" markerHeight="10" refX="13" refY="5" orient="auto">
+    <polygon points="0,0 13,5 0,10" fill="white" stroke="#6b21a8" stroke-width="1.5"/>
+  </marker>
+  <!-- Actor generalisation -->
+  <marker id="m-agen" markerWidth="14" markerHeight="10" refX="13" refY="5" orient="auto">
+    <polygon points="0,0 13,5 0,10" fill="white" stroke="#0f766e" stroke-width="1.5"/>
+  </marker>
+</defs>
+
+<!-- ═══════════════════════════════════════════════
+     ASSOCIATION LINES: Actor → Use Case
+     (plain solid line, no arrowhead typically, 
+      but we use open arrowhead per VP convention)
+═══════════════════════════════════════════════ -->
+
+<!-- DATA ANALYST associations -->
+<line id="l-da-uc01" stroke="#374151" stroke-width="1.4"/>
+<line id="l-da-uc02" stroke="#374151" stroke-width="1.4"/>
+<line id="l-da-uc04" stroke="#374151" stroke-width="1.4"/>
+<line id="l-da-uc09" stroke="#374151" stroke-width="1.4"/>
+<line id="l-da-uc10" stroke="#374151" stroke-width="1.4"/>
+<line id="l-da-uc11" stroke="#374151" stroke-width="1.4"/>
+<line id="l-da-uc13" stroke="#374151" stroke-width="1.4"/>
+
+<!-- MARKETING MANAGER associations -->
+<line id="l-mm-uc04" stroke="#374151" stroke-width="1.4"/>
+<line id="l-mm-uc09" stroke="#374151" stroke-width="1.4"/>
+<line id="l-mm-uc12" stroke="#374151" stroke-width="1.4"/>
+
+<!-- GAME DEVELOPER associations -->
+<line id="l-gd-uc02" stroke="#374151" stroke-width="1.4"/>
+<line id="l-gd-uc03" stroke="#374151" stroke-width="1.4"/>
+<line id="l-gd-uc11" stroke="#374151" stroke-width="1.4"/>
+
+<!-- FINANCE OFFICER associations -->
+<line id="l-fo-uc05" stroke="#374151" stroke-width="1.4"/>
+<line id="l-fo-uc10" stroke="#374151" stroke-width="1.4"/>
+<line id="l-fo-uc12" stroke="#374151" stroke-width="1.4"/>
+
+<!-- GAME SERVER (system actor) associations -->
+<line id="l-gs-uc01" stroke="#374151" stroke-width="1.4"/>
+<line id="l-gs-uc06" stroke="#374151" stroke-width="1.4"/>
+
+<!-- ═══════════════════════════════════════════════
+     «include» RELATIONSHIPS (dashed, blue)
+═══════════════════════════════════════════════ -->
+<!-- Record Transaction includes Categorise by Item Type -->
+<line id="l-inc-01-02" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- Record Transaction includes Record Character Class -->
+<line id="l-inc-01-03" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- Record Transaction includes Record Player Region -->
+<line id="l-inc-01-06" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- Record Transaction includes Classify Player Account -->
+<line id="l-inc-01-07" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- Generate Sales Report includes View Revenue Trends -->
+<line id="l-inc-09-10" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- Generate Sales Report includes Authenticate User -->
+<line id="l-inc-09-13" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- Export Report includes Authenticate User -->
+<line id="l-inc-12-13" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- Track Bundle vs Individual includes Record Transaction -->
+<line id="l-inc-05-01" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+
+<!-- ═══════════════════════════════════════════════
+     «extend» RELATIONSHIPS (dashed, pink)
+═══════════════════════════════════════════════ -->
+<!-- Identify Best-Selling Items extends Generate Sales Report -->
+<line id="l-ext-04-09" stroke="#9d174d" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-extend)"/>
+<!-- Flag Underperforming Items extends Generate Sales Report -->
+<line id="l-ext-11-09" stroke="#9d174d" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-extend)"/>
+<!-- Track Repeat vs First-Time Buyer extends Record Transaction -->
+<line id="l-ext-08-01" stroke="#9d174d" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-extend)"/>
+
+<!-- UC13 includes UC15 Manage User Roles -->
+<line id="l-inc-13-15" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- UC11 includes UC14 Configure Thresholds (restricted) -->
+<line id="l-inc-11-14" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- Data Analyst associates with UC14 -->
+<line id="l-da-uc14" stroke="#374151" stroke-width="1.4"/>
+<!-- Data Analyst associates with UC15 -->
+<line id="l-da-uc15" stroke="#374151" stroke-width="1.4"/>
+<!-- Data Analyst associates with UC16 -->
+<line id="l-da-uc16" stroke="#374151" stroke-width="1.4"/>
+<!-- UC16 includes UC06 (region) -->
+<line id="l-inc-16-06" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- UC16 includes UC07 (tier) -->
+<line id="l-inc-16-07" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- UC09 includes UC17 Apply Report Filters -->
+<line id="l-inc-09-17" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- UC18 includes UC13 (dashboard access requires auth) -->
+<line id="l-inc-18-13" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- UC18 includes UC09 (dashboard displays sales report) -->
+<line id="l-inc-18-09" stroke="#1d4ed8" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#m-include)"/>
+<!-- Actor associations for UC17 -->
+<line id="l-da-uc17" stroke="#374151" stroke-width="1.4"/>
+<line id="l-mm-uc17" stroke="#374151" stroke-width="1.4"/>
+<line id="l-fo-uc17" stroke="#374151" stroke-width="1.4"/>
+<!-- Actor associations for UC18 -->
+<line id="l-da-uc18" stroke="#374151" stroke-width="1.4"/>
+<line id="l-mm-uc18" stroke="#374151" stroke-width="1.4"/>
+<line id="l-fo-uc18" stroke="#374151" stroke-width="1.4"/>
+<line id="l-gd-uc18" stroke="#374151" stroke-width="1.4"/>
+
+<!-- ═══════════════════════════════════════════════
+     GENERALISATION: Actor hierarchy
+═══════════════════════════════════════════════ -->
+<!-- Marketing Manager generalises from Authenticated User -->
+<line id="l-gen-mm-au" stroke="#6b21a8" stroke-width="1.5" marker-end="url(#m-gen)"/>
+<!-- Game Developer generalises from Authenticated User -->
+<line id="l-gen-gd-au" stroke="#6b21a8" stroke-width="1.5" marker-end="url(#m-gen)"/>
+<!-- Finance Officer generalises from Authenticated User -->
+<line id="l-gen-fo-au" stroke="#6b21a8" stroke-width="1.5" marker-end="url(#m-gen)"/>
+<!-- Data Analyst generalises from Authenticated User -->
+<line id="l-gen-da-au" stroke="#6b21a8" stroke-width="1.5" marker-end="url(#m-gen)"/>
+
+<!-- ═══════════════════════════════════════════════
+     INCLUDE / EXTEND LABELS
+═══════════════════════════════════════════════ -->
+<!-- Labels rendered dynamically -->
+
+</svg>
+
+<!-- ══════════════════════════════════════
+     SYSTEM BOUNDARY
+══════════════════════════════════════ -->
+<div class="system-boundary" id="sys-boundary" style="left:280px;top:100px;width:2800px;height:2700px;"></div>
+<div class="system-label" id="sys-label" style="left:350px;top:80px;">Microtransaction Analytics System (MAS)</div>
+
+<!-- ══════════════════════════════════════
+     ACTORS (Left Side)
+══════════════════════════════════════ -->
+
+<!-- Data Analyst -->
+<div class="actor" id="a-da" style="left:90px;top:300px">
+  <svg width="50" height="72" viewBox="0 0 50 72">
+    <circle cx="25" cy="14" r="11" fill="#fff" stroke="#1e3a5f" stroke-width="2"/>
+    <line x1="25" y1="25" x2="25" y2="52" stroke="#1e3a5f" stroke-width="2"/>
+    <line x1="25" y1="36" x2="10" y2="28" stroke="#1e3a5f" stroke-width="2"/>
+    <line x1="25" y1="36" x2="40" y2="28" stroke="#1e3a5f" stroke-width="2"/>
+    <line x1="25" y1="52" x2="10" y2="68" stroke="#1e3a5f" stroke-width="2"/>
+    <line x1="25" y1="52" x2="40" y2="68" stroke="#1e3a5f" stroke-width="2"/>
+    <text x="25" y="18" text-anchor="middle" font-family="IBM Plex Sans" font-size="9" fill="#1e3a5f" font-weight="600">DA</text>
+  </svg>
+  <div class="actor-label">Data<br>Analyst</div>
+</div>
+
+<!-- Marketing Manager -->
+<div class="actor" id="a-mm" style="left:80px;top:580px">
+  <svg width="50" height="72" viewBox="0 0 50 72">
+    <circle cx="25" cy="14" r="11" fill="#fff" stroke="#0369a1" stroke-width="2"/>
+    <line x1="25" y1="25" x2="25" y2="52" stroke="#0369a1" stroke-width="2"/>
+    <line x1="25" y1="36" x2="10" y2="28" stroke="#0369a1" stroke-width="2"/>
+    <line x1="25" y1="36" x2="40" y2="28" stroke="#0369a1" stroke-width="2"/>
+    <line x1="25" y1="52" x2="10" y2="68" stroke="#0369a1" stroke-width="2"/>
+    <line x1="25" y1="52" x2="40" y2="68" stroke="#0369a1" stroke-width="2"/>
+    <text x="25" y="18" text-anchor="middle" font-family="IBM Plex Sans" font-size="9" fill="#0369a1" font-weight="600">MM</text>
+  </svg>
+  <div class="actor-label">Marketing<br>Manager</div>
+</div>
+
+<!-- Game Developer -->
+<div class="actor" id="a-gd" style="left:80px;top:860px">
+  <svg width="50" height="72" viewBox="0 0 50 72">
+    <circle cx="25" cy="14" r="11" fill="#fff" stroke="#15803d" stroke-width="2"/>
+    <line x1="25" y1="25" x2="25" y2="52" stroke="#15803d" stroke-width="2"/>
+    <line x1="25" y1="36" x2="10" y2="28" stroke="#15803d" stroke-width="2"/>
+    <line x1="25" y1="36" x2="40" y2="28" stroke="#15803d" stroke-width="2"/>
+    <line x1="25" y1="52" x2="10" y2="68" stroke="#15803d" stroke-width="2"/>
+    <line x1="25" y1="52" x2="40" y2="68" stroke="#15803d" stroke-width="2"/>
+    <text x="25" y="18" text-anchor="middle" font-family="IBM Plex Sans" font-size="9" fill="#15803d" font-weight="600">GD</text>
+  </svg>
+  <div class="actor-label">Game<br>Developer</div>
+</div>
+
+<!-- Finance Officer -->
+<div class="actor" id="a-fo" style="left:80px;top:1140px">
+  <svg width="50" height="72" viewBox="0 0 50 72">
+    <circle cx="25" cy="14" r="11" fill="#fff" stroke="#b45309" stroke-width="2"/>
+    <line x1="25" y1="25" x2="25" y2="52" stroke="#b45309" stroke-width="2"/>
+    <line x1="25" y1="36" x2="10" y2="28" stroke="#b45309" stroke-width="2"/>
+    <line x1="25" y1="36" x2="40" y2="28" stroke="#b45309" stroke-width="2"/>
+    <line x1="25" y1="52" x2="10" y2="68" stroke="#b45309" stroke-width="2"/>
+    <line x1="25" y1="52" x2="40" y2="68" stroke="#b45309" stroke-width="2"/>
+    <text x="25" y="18" text-anchor="middle" font-family="IBM Plex Sans" font-size="9" fill="#b45309" font-weight="600">FO</text>
+  </svg>
+  <div class="actor-label">Finance<br>Officer</div>
+</div>
+
+<!-- Authenticated User (generalisation parent) -->
+<div class="actor" id="a-au" style="left:70px;top:1450px">
+  <svg width="50" height="72" viewBox="0 0 50 72">
+    <circle cx="25" cy="14" r="11" fill="#f3e8ff" stroke="#6b21a8" stroke-width="2"/>
+    <line x1="25" y1="25" x2="25" y2="52" stroke="#6b21a8" stroke-width="2"/>
+    <line x1="25" y1="36" x2="10" y2="28" stroke="#6b21a8" stroke-width="2"/>
+    <line x1="25" y1="36" x2="40" y2="28" stroke="#6b21a8" stroke-width="2"/>
+    <line x1="25" y1="52" x2="10" y2="68" stroke="#6b21a8" stroke-width="2"/>
+    <line x1="25" y1="52" x2="40" y2="68" stroke="#6b21a8" stroke-width="2"/>
+    <text x="25" y="18" text-anchor="middle" font-family="IBM Plex Sans" font-size="8" fill="#6b21a8" font-weight="700">AU</text>
+  </svg>
+  <div class="actor-label" style="color:#6b21a8;">Authenticated<br>User</div>
+</div>
+
+<!-- Game Server (right-side external system) -->
+<div class="actor" id="a-gs" style="left:2900px;top:260px">
+  <svg width="60" height="72" viewBox="0 0 60 72">
+    <rect x="4" y="4" width="52" height="38" rx="4" fill="#fff" stroke="#374151" stroke-width="2"/>
+    <rect x="4" y="18" width="52" height="4" fill="#e5e7eb"/>
+    <circle cx="16" cy="28" r="4" fill="#374151"/>
+    <rect x="26" y="26" width="22" height="4" rx="2" fill="#9ca3af"/>
+    <line x1="30" y1="42" x2="30" y2="60" stroke="#374151" stroke-width="2"/>
+    <rect x="14" y="58" width="32" height="6" rx="2" fill="#374151"/>
+    <text x="30" y="13" text-anchor="middle" font-family="IBM Plex Sans" font-size="8" fill="#374151" font-weight="700">SYS</text>
+  </svg>
+  <div class="actor-label" style="max-width:80px;">Game Server<br><span style="color:#64748b;font-size:9px">«system»</span></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     USE CASES
+══════════════════════════════════════ -->
+
+<!-- UC01: Record Microtransaction Purchase -->
+<div class="uc" id="uc-01" style="left:540px;top:150px" data-tip="FR01 — Record every purchase event (item, price, timestamp, player account)">
+  <svg width="220" height="70" viewBox="0 0 220 70">
+    <ellipse cx="110" cy="35" rx="106" ry="32"/>
+    <text x="110" y="29" text-anchor="middle" font-size="10" font-weight="600">Record Microtransaction</text>
+    <text x="110" y="44" text-anchor="middle" font-size="10" font-weight="600">Purchase</text>
+    <text x="110" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC01»</text>
+  </svg>
+</div>
+
+<!-- UC02: Categorise Purchase by Item Type -->
+<div class="uc" id="uc-02" style="left:860px;top:120px" data-tip="FR02 — Categorise by weapon skin, armour skin, pet, portal effect, hideout decoration, stash tab expansion, or bundle">
+  <svg width="220" height="70" viewBox="0 0 220 70">
+    <ellipse cx="110" cy="35" rx="106" ry="32"/>
+    <text x="110" y="29" text-anchor="middle" font-size="10" font-weight="600">Categorise Purchase</text>
+    <text x="110" y="44" text-anchor="middle" font-size="10" font-weight="600">by Item Type</text>
+    <text x="110" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC02»</text>
+  </svg>
+</div>
+
+<!-- UC03: Record Character Class at Purchase -->
+<div class="uc" id="uc-03" style="left:860px;top:260px" data-tip="FR03 — Track which character class (Marauder, Ranger, etc.) was active at time of purchase">
+  <svg width="220" height="70" viewBox="0 0 220 70">
+    <ellipse cx="110" cy="35" rx="106" ry="32"/>
+    <text x="110" y="29" text-anchor="middle" font-size="10" font-weight="600">Record Character Class</text>
+    <text x="110" y="44" text-anchor="middle" font-size="10" font-weight="600">at Purchase</text>
+    <text x="110" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC03»</text>
+  </svg>
+</div>
+
+<!-- UC04: Identify Best-Selling MTX Items -->
+<div class="uc" id="uc-04" style="left:540px;top:380px" data-tip="FR04 — Identify best-selling MTX items over a selectable reporting period">
+  <svg width="220" height="70" viewBox="0 0 220 70">
+    <ellipse cx="110" cy="35" rx="106" ry="32"/>
+    <text x="110" y="29" text-anchor="middle" font-size="10" font-weight="600">Identify Best-Selling</text>
+    <text x="110" y="44" text-anchor="middle" font-size="10" font-weight="600">MTX Items</text>
+    <text x="110" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC04»</text>
+  </svg>
+</div>
+
+<!-- UC05: Track Bundle vs Individual Purchases -->
+<div class="uc" id="uc-05" style="left:540px;top:560px" data-tip="FR05 — Separately record bundle purchases vs individual item purchases">
+  <svg width="220" height="70" viewBox="0 0 220 70">
+    <ellipse cx="110" cy="35" rx="106" ry="32"/>
+    <text x="110" y="29" text-anchor="middle" font-size="10" font-weight="600">Track Bundle vs</text>
+    <text x="110" y="44" text-anchor="middle" font-size="10" font-weight="600">Individual Purchases</text>
+    <text x="110" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC05»</text>
+  </svg>
+</div>
+
+<!-- UC06: Record Player Region -->
+<div class="uc" id="uc-06" style="left:860px;top:420px" data-tip="FR06 — Record player geographic region/country at time of purchase">
+  <svg width="200" height="70" viewBox="0 0 200 70">
+    <ellipse cx="100" cy="35" rx="96" ry="32"/>
+    <text x="100" y="29" text-anchor="middle" font-size="10" font-weight="600">Record Player</text>
+    <text x="100" y="44" text-anchor="middle" font-size="10" font-weight="600">Region</text>
+    <text x="100" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC06»</text>
+  </svg>
+</div>
+
+<!-- UC07: Classify Player Account -->
+<div class="uc" id="uc-07" style="left:860px;top:560px" data-tip="FR07 — Classify players by account age and spending tier (casual/regular/whale)">
+  <svg width="200" height="70" viewBox="0 0 200 70">
+    <ellipse cx="100" cy="35" rx="96" ry="32"/>
+    <text x="100" y="29" text-anchor="middle" font-size="10" font-weight="600">Classify Player</text>
+    <text x="100" y="44" text-anchor="middle" font-size="10" font-weight="600">Account</text>
+    <text x="100" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC07»</text>
+  </svg>
+</div>
+
+<!-- UC08: Track Repeat vs First-Time Buyer -->
+<div class="uc" id="uc-08" style="left:860px;top:700px" data-tip="FR08 — Track repeat purchases vs first-time buyers per item">
+  <svg width="210" height="70" viewBox="0 0 210 70">
+    <ellipse cx="105" cy="35" rx="101" ry="32"/>
+    <text x="105" y="29" text-anchor="middle" font-size="10" font-weight="600">Track Repeat vs</text>
+    <text x="105" y="44" text-anchor="middle" font-size="10" font-weight="600">First-Time Buyer</text>
+    <text x="105" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC08»</text>
+  </svg>
+</div>
+
+<!-- UC09: Generate Filterable Sales Report -->
+<div class="uc" id="uc-09" style="left:540px;top:820px" data-tip="FR09 — Generate sales reports filterable by date, region, item type, and character class">
+  <svg width="230" height="70" viewBox="0 0 230 70">
+    <ellipse cx="115" cy="35" rx="111" ry="32"/>
+    <text x="115" y="29" text-anchor="middle" font-size="10" font-weight="600">Generate Filterable</text>
+    <text x="115" y="44" text-anchor="middle" font-size="10" font-weight="600">Sales Report</text>
+    <text x="115" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC09»</text>
+  </svg>
+</div>
+
+<!-- UC10: View Revenue Trends -->
+<div class="uc" id="uc-10" style="left:860px;top:860px" data-tip="FR10 — Display revenue trends over daily, weekly, and monthly time windows">
+  <svg width="210" height="70" viewBox="0 0 210 70">
+    <ellipse cx="105" cy="35" rx="101" ry="32"/>
+    <text x="105" y="29" text-anchor="middle" font-size="10" font-weight="600">View Revenue</text>
+    <text x="105" y="44" text-anchor="middle" font-size="10" font-weight="600">Trends</text>
+    <text x="105" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC10»</text>
+  </svg>
+</div>
+
+<!-- UC11: Flag Underperforming MTX Items -->
+<div class="uc" id="uc-11" style="left:540px;top:1060px" data-tip="FR11 — Flag MTX items below configurable underperformance thresholds">
+  <svg width="220" height="70" viewBox="0 0 220 70">
+    <ellipse cx="110" cy="35" rx="106" ry="32"/>
+    <text x="110" y="29" text-anchor="middle" font-size="10" font-weight="600">Flag Underperforming</text>
+    <text x="110" y="44" text-anchor="middle" font-size="10" font-weight="600">MTX Items</text>
+    <text x="110" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC11»</text>
+  </svg>
+</div>
+
+<!-- UC12: Export Report Data -->
+<div class="uc" id="uc-12" style="left:540px;top:1220px" data-tip="FR12 — Allow authorised users to export reports in CSV, PDF, or JSON format via ExportService">
+  <svg width="200" height="70" viewBox="0 0 200 70">
+    <ellipse cx="100" cy="35" rx="96" ry="32"/>
+    <text x="100" y="29" text-anchor="middle" font-size="10" font-weight="600">Export Report</text>
+    <text x="100" y="44" text-anchor="middle" font-size="10" font-weight="600">Data</text>
+    <text x="100" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC12»</text>
+  </svg>
+</div>
+
+<!-- UC13: Authenticate User (included) -->
+<div class="uc" id="uc-13" style="left:860px;top:1100px" data-tip="FR13, FR14 — Authenticate user and enforce role-based access control">
+  <svg width="210" height="70" viewBox="0 0 210 70">
+    <ellipse cx="105" cy="35" rx="101" ry="32"/>
+    <text x="105" y="29" text-anchor="middle" font-size="10" font-weight="600">Authenticate User</text>
+    <text x="105" y="44" text-anchor="middle" font-size="10" font-weight="600">/ RBAC</text>
+    <text x="105" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC13»</text>
+  </svg>
+</div>
+
+<!-- UC14: Configure Underperformance Thresholds (admin) -->
+<div class="uc" id="uc-14" style="left:860px;top:1240px" data-tip="FR11, FR14 — Configure thresholds for flagging underperforming items (authorised roles only)">
+  <svg width="230" height="70" viewBox="0 0 230 70">
+    <ellipse cx="115" cy="35" rx="111" ry="32"/>
+    <text x="115" y="29" text-anchor="middle" font-size="10" font-weight="600">Configure Underperformance</text>
+    <text x="115" y="44" text-anchor="middle" font-size="10" font-weight="600">Thresholds</text>
+    <text x="115" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC14»</text>
+  </svg>
+</div>
+
+<!-- UC15: Manage User Roles & Permissions -->
+<div class="uc" id="uc-15" style="left:1200px;top:820px" data-tip="FR13, FR14 — Support four distinct roles with appropriate access restrictions">
+  <svg width="230" height="70" viewBox="0 0 230 70">
+    <ellipse cx="115" cy="35" rx="111" ry="32"/>
+    <text x="115" y="29" text-anchor="middle" font-size="10" font-weight="600">Manage User Roles</text>
+    <text x="115" y="44" text-anchor="middle" font-size="10" font-weight="600">&amp; Permissions</text>
+    <text x="115" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC15»</text>
+  </svg>
+</div>
+
+<!-- UC16: View Segment Analysis by Region/Tier -->
+<div class="uc" id="uc-16" style="left:1200px;top:560px" data-tip="FR06, FR07, BR-06 — Segment purchase data by player region and spending tier">
+  <svg width="240" height="70" viewBox="0 0 240 70">
+    <ellipse cx="120" cy="35" rx="116" ry="32"/>
+    <text x="120" y="29" text-anchor="middle" font-size="10" font-weight="600">View Segment Analysis</text>
+    <text x="120" y="44" text-anchor="middle" font-size="10" font-weight="600">by Region / Tier</text>
+    <text x="120" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC16»</text>
+  </svg>
+</div>
+
+<!-- UC17: Apply Report Filters -->
+<div class="uc" id="uc-17" style="left:1200px;top:1060px" data-tip="FR09, FR06 — Apply FilterSet (region, item type, character class, date range) to narrow report results; maps to ReportEngine.applyFilter() and FilterSet / DateRange classes">
+  <svg width="230" height="70" viewBox="0 0 230 70">
+    <ellipse cx="115" cy="35" rx="111" ry="32"/>
+    <text x="115" y="29" text-anchor="middle" font-size="10" font-weight="600">Apply Report</text>
+    <text x="115" y="44" text-anchor="middle" font-size="10" font-weight="600">Filters</text>
+    <text x="115" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC17»</text>
+  </svg>
+</div>
+
+<!-- UC18: Access Analytics Dashboard -->
+<div class="uc" id="uc-18" style="left:1200px;top:1240px" data-tip="FR09, FR13 — Authenticated users access the AnalyticsDashboard to view sales, demographic, trend, and underperforming-item views; maps to SystemUser «uses» AnalyticsDashboard and ViewType enum">
+  <svg width="240" height="70" viewBox="0 0 240 70">
+    <ellipse cx="120" cy="35" rx="116" ry="32"/>
+    <text x="120" y="29" text-anchor="middle" font-size="10" font-weight="600">Access Analytics</text>
+    <text x="120" y="44" text-anchor="middle" font-size="10" font-weight="600">Dashboard</text>
+    <text x="120" y="57" text-anchor="middle" font-size="8.5" fill="#64748b">«UC18»</text>
+  </svg>
+</div>
+
+<!-- ══════════════════════════════════════
+     RELATION LABELS (SVG text overlay)
+══════════════════════════════════════ -->
+<svg style="position:absolute;top:0;left:0;width:4200px;height:3200px;pointer-events:none;overflow:visible" id="rel-labels">
+</svg>
+
+</div><!-- end world -->
+</div><!-- end canvas -->
+
+<!-- ══════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════ -->
+<div id="side">
+  <h2>Relationship Legend</h2>
+
+  <div class="lr">
+    <div class="li">
+      <svg width="52" height="20"><line x1="2" y1="10" x2="40" y2="10" stroke="#374151" stroke-width="1.8"/><path d="M35,6 L43,10 L35,14" fill="none" stroke="#374151" stroke-width="1.5"/></svg>
+    </div>
+    <div class="lt">
+      <div class="ln">Association</div>
+      <div class="ld">Actor communicates with use case</div>
+    </div>
+  </div>
+
+  <div class="lr">
+    <div class="li">
+      <svg width="52" height="20"><line x1="2" y1="10" x2="40" y2="10" stroke="#1d4ed8" stroke-width="1.5" stroke-dasharray="5,3"/><path d="M35,6 L43,10 L35,14" fill="none" stroke="#1d4ed8" stroke-width="1.5"/></svg>
+    </div>
+    <div class="lt">
+      <div class="ln" style="color:#1d4ed8">«include»</div>
+      <div class="ld">Base UC always invokes included UC</div>
+      <div class="lv">Arrow points to included UC</div>
+    </div>
+  </div>
+
+  <div class="lr">
+    <div class="li">
+      <svg width="52" height="20"><line x1="2" y1="10" x2="40" y2="10" stroke="#9d174d" stroke-width="1.5" stroke-dasharray="5,3"/><path d="M35,6 L43,10 L35,14" fill="none" stroke="#9d174d" stroke-width="1.5"/></svg>
+    </div>
+    <div class="lt">
+      <div class="ln" style="color:#9d174d">«extend»</div>
+      <div class="ld">Extension UC optionally extends base UC</div>
+      <div class="lv">Arrow points to base UC (extension point)</div>
+    </div>
+  </div>
+
+  <div class="lr">
+    <div class="li">
+      <svg width="52" height="20"><line x1="2" y1="10" x2="36" y2="10" stroke="#6b21a8" stroke-width="1.5"/><polygon points="36,5 46,10 36,15" fill="white" stroke="#6b21a8" stroke-width="1.5"/></svg>
+    </div>
+    <div class="lt">
+      <div class="ln" style="color:#6b21a8">Generalisation</div>
+      <div class="ld">Specialised actor inherits from general actor</div>
+      <div class="lv">Hollow triangle → supertype</div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:14px">Use Cases</h2>
+
+  <h3>Sales &amp; Tracking</h3>
+  <div class="uc-entry uc-sales" onclick="focusUC('uc-01')">
+    <div class="uc-id">UC01</div>
+    <div class="uc-name">Record Microtransaction Purchase</div>
+    <div class="uc-fr">FR01 · Primary</div>
+  </div>
+  <div class="uc-entry uc-sales" onclick="focusUC('uc-02')">
+    <div class="uc-id">UC02</div>
+    <div class="uc-name">Categorise Purchase by Item Type</div>
+    <div class="uc-fr">FR02 · «include» from UC01</div>
+  </div>
+  <div class="uc-entry uc-sales" onclick="focusUC('uc-03')">
+    <div class="uc-id">UC03</div>
+    <div class="uc-name">Record Character Class at Purchase</div>
+    <div class="uc-fr">FR03 · «include» from UC01</div>
+  </div>
+  <div class="uc-entry uc-sales" onclick="focusUC('uc-04')">
+    <div class="uc-id">UC04</div>
+    <div class="uc-name">Identify Best-Selling MTX Items</div>
+    <div class="uc-fr">FR04 · «extend» UC09</div>
+  </div>
+  <div class="uc-entry uc-sales" onclick="focusUC('uc-05')">
+    <div class="uc-id">UC05</div>
+    <div class="uc-name">Track Bundle vs Individual Purchases</div>
+    <div class="uc-fr">FR05 · «include» UC01</div>
+  </div>
+
+  <h3>Player Demographics</h3>
+  <div class="uc-entry uc-demo" onclick="focusUC('uc-06')">
+    <div class="uc-id">UC06</div>
+    <div class="uc-name">Record Player Region</div>
+    <div class="uc-fr">FR06 · «include» from UC01</div>
+  </div>
+  <div class="uc-entry uc-demo" onclick="focusUC('uc-07')">
+    <div class="uc-id">UC07</div>
+    <div class="uc-name">Classify Player Account</div>
+    <div class="uc-fr">FR07 · «include» from UC01</div>
+  </div>
+  <div class="uc-entry uc-demo" onclick="focusUC('uc-08')">
+    <div class="uc-id">UC08</div>
+    <div class="uc-name">Track Repeat vs First-Time Buyer</div>
+    <div class="uc-fr">FR08 · «extend» UC01</div>
+  </div>
+  <div class="uc-entry uc-demo" onclick="focusUC('uc-16')">
+    <div class="uc-id">UC16</div>
+    <div class="uc-name">View Segment Analysis by Region/Tier</div>
+    <div class="uc-fr">FR06, FR07 · «include» UC06, UC07</div>
+  </div>
+
+  <h3>Reporting &amp; Analytics</h3>
+  <div class="uc-entry uc-report" onclick="focusUC('uc-09')">
+    <div class="uc-id">UC09</div>
+    <div class="uc-name">Generate Filterable Sales Report</div>
+    <div class="uc-fr">FR09 · Core reporting UC</div>
+  </div>
+  <div class="uc-entry uc-report" onclick="focusUC('uc-10')">
+    <div class="uc-id">UC10</div>
+    <div class="uc-name">View Revenue Trends</div>
+    <div class="uc-fr">FR10 · «include» from UC09</div>
+  </div>
+  <div class="uc-entry uc-report" onclick="focusUC('uc-11')">
+    <div class="uc-id">UC11</div>
+    <div class="uc-name">Flag Underperforming MTX Items</div>
+    <div class="uc-fr">FR11 · «extend» UC09</div>
+  </div>
+  <div class="uc-entry uc-report" onclick="focusUC('uc-12')">
+    <div class="uc-id">UC12</div>
+    <div class="uc-name">Export Report Data</div>
+    <div class="uc-fr">FR12 · CSV / PDF / JSON · «include» UC13</div>
+  </div>
+  <div class="uc-entry uc-report" onclick="focusUC('uc-17')">
+    <div class="uc-id">UC17</div>
+    <div class="uc-name">Apply Report Filters</div>
+    <div class="uc-fr">FR09, FR06 · «include» from UC09 · FilterSet + DateRange</div>
+  </div>
+  <div class="uc-entry uc-report" onclick="focusUC('uc-18')">
+    <div class="uc-id">UC18</div>
+    <div class="uc-name">Access Analytics Dashboard</div>
+    <div class="uc-fr">FR09, FR13 · «include» UC09, UC13 · ViewType enum</div>
+  </div>
+
+  <h3>Access &amp; Security</h3>
+  <div class="uc-entry uc-access" onclick="focusUC('uc-13')">
+    <div class="uc-id">UC13</div>
+    <div class="uc-name">Authenticate User / RBAC</div>
+    <div class="uc-fr">FR13, FR14 · «include» target · «include» UC15</div>
+  </div>
+  <div class="uc-entry uc-access" onclick="focusUC('uc-14')">
+    <div class="uc-id">UC14</div>
+    <div class="uc-name">Configure Underperformance Thresholds</div>
+    <div class="uc-fr">FR11, FR14 · «include» from UC11</div>
+  </div>
+  <div class="uc-entry uc-access" onclick="focusUC('uc-15')">
+    <div class="uc-id">UC15</div>
+    <div class="uc-name">Manage User Roles &amp; Permissions</div>
+    <div class="uc-fr">FR13, FR14 · «include» from UC13</div>
+  </div>
+
+  <h2 style="margin-top:14px">Actors</h2>
+  <div style="font-size:10px;line-height:1.8;color:#374151">
+    <div><b style="color:#1e3a5f">▪ Data Analyst</b> — FR01–FR12, FR14</div>
+    <div><b style="color:#0369a1">▪ Marketing Manager</b> — FR04, FR09, FR12</div>
+    <div><b style="color:#15803d">▪ Game Developer</b> — FR02, FR03, FR11</div>
+    <div><b style="color:#b45309">▪ Finance Officer</b> — FR05, FR10, FR12</div>
+    <div><b style="color:#6b21a8">▪ Authenticated User</b> — Supertype (generalisation)</div>
+    <div><b style="color:#374151">▪ Game Server</b> — «system» external actor</div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div id="controls">
+  <div class="cb" id="btn-zoom-in" title="Zoom in">+</div>
+  <div class="cb" id="btn-zoom-out" title="Zoom out">−</div>
+  <div class="cb" id="btn-reset" title="Reset view">⌂</div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ─── Draggable Elements ────────────────────────────────────────
+let dragEl=null, dragOffX=0, dragOffY=0;
+document.querySelectorAll('.uc,.actor').forEach(el=>{
+  el.addEventListener('mousedown',e=>{
+    if(e.button!==0)return;
+    e.stopPropagation();
+    dragEl=el;
+    const r=el.getBoundingClientRect();
+    const ws=document.getElementById('world');
+    const wt=new DOMMatrix(ws.style.transform||'matrix(1,0,0,1,0,0)');
+    dragOffX=(e.clientX-r.left)/scale;
+    dragOffY=(e.clientY-r.top)/scale;
+    el.classList.add('dragging');
+    e.preventDefault();
+  });
+});
+document.addEventListener('mousemove',e=>{
+  if(!dragEl)return;
+  const world=document.getElementById('world');
+  const cr=document.getElementById('canvas').getBoundingClientRect();
+  const nx=(e.clientX-cr.left)/scale - dragOffX + panX/scale;
+  const ny=(e.clientY-cr.top)/scale - dragOffY + panY/scale;
+  dragEl.style.left=Math.max(0,nx)+'px';
+  dragEl.style.top=Math.max(0,ny)+'px';
+  updateAllLines();
+});
+document.addEventListener('mouseup',()=>{
+  if(dragEl){dragEl.classList.remove('dragging');dragEl=null;}
+});
+
+// ─── Pan & Zoom ────────────────────────────────────────────────
+let scale=0.52, panX=0, panY=0;
+let isPanning=false, panStartX=0, panStartY=0;
+const canvas=document.getElementById('canvas');
+const world=document.getElementById('world');
+
+function applyTransform(){
+  world.style.transform=`translate(${panX}px,${panY}px) scale(${scale})`;
+}
+applyTransform();
+
+canvas.addEventListener('mousedown',e=>{
+  if(dragEl)return;
+  isPanning=true;
+  panStartX=e.clientX-panX;
+  panStartY=e.clientY-panY;
+  canvas.classList.add('panning');
+});
+document.addEventListener('mousemove',e=>{
+  if(!isPanning||dragEl)return;
+  panX=e.clientX-panStartX;
+  panY=e.clientY-panStartY;
+  applyTransform();
+});
+document.addEventListener('mouseup',()=>{isPanning=false;canvas.classList.remove('panning')});
+
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const delta=e.deltaY>0?0.9:1.11;
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  panX=mx-(mx-panX)*delta;
+  panY=my-(my-panY)*delta;
+  scale=Math.min(2,Math.max(0.15,scale*delta));
+  applyTransform();
+},{passive:false});
+
+document.getElementById('btn-zoom-in').onclick=()=>{scale=Math.min(2,scale*1.2);applyTransform()};
+document.getElementById('btn-zoom-out').onclick=()=>{scale=Math.max(0.15,scale/1.2);applyTransform()};
+document.getElementById('btn-reset').onclick=()=>{scale=0.52;panX=0;panY=0;applyTransform()};
+
+// ─── Centre of element ─────────────────────────────────────────
+function centre(id){
+  const el=document.getElementById(id);
+  const l=parseFloat(el.style.left||0);
+  const t=parseFloat(el.style.top||0);
+  // Get element size
+  const s=el.getBoundingClientRect();
+  const sw=s.width/scale, sh=s.height/scale;
+  return {x:l+sw/2, y:t+sh/2, l,t,w:sw,h:sh};
+}
+
+// ─── Edge intersection helper ──────────────────────────────────
+function actorCentre(id){
+  const el=document.getElementById(id);
+  const l=parseFloat(el.style.left||0);
+  const t=parseFloat(el.style.top||0);
+  return {x:l+25, y:t+36};
+}
+
+function ucEdge(id, tx, ty){
+  // Find closest point on ellipse to target
+  const el=document.getElementById(id);
+  const l=parseFloat(el.style.left||0);
+  const t=parseFloat(el.style.top||0);
+  const svgEl=el.querySelector('ellipse');
+  const cx=l+parseFloat(svgEl.getAttribute('cx'));
+  const cy=t+parseFloat(svgEl.getAttribute('cy'));
+  const rx=parseFloat(svgEl.getAttribute('rx'));
+  const ry=parseFloat(svgEl.getAttribute('ry'));
+  const dx=tx-cx, dy=ty-cy;
+  const len=Math.sqrt(dx*dx+dy*dy)||1;
+  // parametric ellipse intersection
+  const angle=Math.atan2(dy,dx);
+  const ex=cx+rx*Math.cos(angle);
+  const ey=cy+ry*Math.sin(angle);
+  return {x:ex, y:ey};
+}
+
+function setLine(id, x1,y1,x2,y2){
+  const ln=document.getElementById(id);
+  if(!ln)return;
+  ln.setAttribute('x1',x1);ln.setAttribute('y1',y1);
+  ln.setAttribute('x2',x2);ln.setAttribute('y2',y2);
+}
+
+// ─── Arrow Labels (include/extend text) ───────────────────────
+const labelData=[];
+function addLabel(lineId, label, color){
+  labelData.push({lineId, label, color});
+}
+addLabel('l-inc-01-02','«include»','#1d4ed8');
+addLabel('l-inc-01-03','«include»','#1d4ed8');
+addLabel('l-inc-01-06','«include»','#1d4ed8');
+addLabel('l-inc-01-07','«include»','#1d4ed8');
+addLabel('l-inc-09-10','«include»','#1d4ed8');
+addLabel('l-inc-09-13','«include»','#1d4ed8');
+addLabel('l-inc-12-13','«include»','#1d4ed8');
+addLabel('l-inc-05-01','«include»','#1d4ed8');
+addLabel('l-ext-04-09','«extend»','#9d174d');
+addLabel('l-ext-11-09','«extend»','#9d174d');
+addLabel('l-inc-13-15','«include»','#1d4ed8');
+addLabel('l-inc-11-14','«include»','#1d4ed8');
+addLabel('l-inc-16-06','«include»','#1d4ed8');
+addLabel('l-inc-16-07','«include»','#1d4ed8');
+addLabel('l-inc-09-17','«include»','#1d4ed8');
+addLabel('l-inc-18-13','«include»','#1d4ed8');
+addLabel('l-inc-18-09','«include»','#1d4ed8');
+
+function updateLabels(){
+  const svg=document.getElementById('rel-labels');
+  svg.innerHTML='';
+  labelData.forEach(({lineId,label,color})=>{
+    const ln=document.getElementById(lineId);
+    if(!ln)return;
+    const x1=parseFloat(ln.getAttribute('x1')||0);
+    const y1=parseFloat(ln.getAttribute('y1')||0);
+    const x2=parseFloat(ln.getAttribute('x2')||0);
+    const y2=parseFloat(ln.getAttribute('y2')||0);
+    const mx=(x1+x2)/2, my=(y1+y2)/2;
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',mx);t.setAttribute('y',my-4);
+    t.setAttribute('text-anchor','middle');
+    t.setAttribute('font-family','IBM Plex Sans');
+    t.setAttribute('font-size','9');
+    t.setAttribute('font-style','italic');
+    t.setAttribute('fill',color);
+    t.setAttribute('font-weight','600');
+    // background rect
+    const bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    bg.setAttribute('x',mx-24);bg.setAttribute('y',my-16);
+    bg.setAttribute('width','48');bg.setAttribute('height','14');
+    bg.setAttribute('fill','rgba(255,255,255,0.82)');bg.setAttribute('rx','3');
+    svg.appendChild(bg);
+    t.textContent=label;
+    svg.appendChild(t);
+  });
+}
+
+// ─── Update all lines ─────────────────────────────────────────
+function updateAllLines(){
+  // Helper: uc to uc line
+  function ucToUC(lid, fromId, toId){
+    const f=centre(fromId), tg=centre(toId);
+    const fe=ucEdge(fromId,tg.x,tg.y);
+    const te=ucEdge(toId,f.x,f.y);
+    setLine(lid,fe.x,fe.y,te.x,te.y);
+  }
+  function actorToUC(lid, actId, ucId){
+    const a=actorCentre(actId);
+    const ue=ucEdge(ucId,a.x,a.y);
+    setLine(lid,a.x,a.y,ue.x,ue.y);
+  }
+  function actorToActor(lid, fromId, toId){
+    const f=actorCentre(fromId), t=actorCentre(toId);
+    setLine(lid,f.x,f.y,t.x,t.y);
+  }
+
+  // Actor associations
+  actorToUC('l-da-uc01','a-da','uc-01');
+  actorToUC('l-da-uc02','a-da','uc-02');
+  actorToUC('l-da-uc04','a-da','uc-04');
+  actorToUC('l-da-uc09','a-da','uc-09');
+  actorToUC('l-da-uc10','a-da','uc-10');
+  actorToUC('l-da-uc11','a-da','uc-11');
+  actorToUC('l-da-uc13','a-da','uc-13');
+
+  actorToUC('l-mm-uc04','a-mm','uc-04');
+  actorToUC('l-mm-uc09','a-mm','uc-09');
+  actorToUC('l-mm-uc12','a-mm','uc-12');
+
+  actorToUC('l-gd-uc02','a-gd','uc-02');
+  actorToUC('l-gd-uc03','a-gd','uc-03');
+  actorToUC('l-gd-uc11','a-gd','uc-11');
+
+  actorToUC('l-fo-uc05','a-fo','uc-05');
+  actorToUC('l-fo-uc10','a-fo','uc-10');
+  actorToUC('l-fo-uc12','a-fo','uc-12');
+
+  actorToUC('l-gs-uc01','a-gs','uc-01');
+  actorToUC('l-gs-uc06','a-gs','uc-06');
+
+  // Include relationships
+  ucToUC('l-inc-01-02','uc-01','uc-02');
+  ucToUC('l-inc-01-03','uc-01','uc-03');
+  ucToUC('l-inc-01-06','uc-01','uc-06');
+  ucToUC('l-inc-01-07','uc-01','uc-07');
+  ucToUC('l-inc-09-10','uc-09','uc-10');
+  ucToUC('l-inc-09-13','uc-09','uc-13');
+  ucToUC('l-inc-12-13','uc-12','uc-13');
+  ucToUC('l-inc-05-01','uc-05','uc-01');
+
+  // Extend relationships
+  ucToUC('l-ext-04-09','uc-04','uc-09');
+  ucToUC('l-ext-11-09','uc-11','uc-09');
+  ucToUC('l-ext-08-01','uc-08','uc-01');
+
+  // Generalisation (actor → Authenticated User)
+  actorToActor('l-gen-da-au','a-da','a-au');
+  actorToActor('l-gen-mm-au','a-mm','a-au');
+  actorToActor('l-gen-gd-au','a-gd','a-au');
+  actorToActor('l-gen-fo-au','a-fo','a-au');
+
+  // Include for UC14, UC15, UC16
+  ucToUC('l-inc-13-15','uc-13','uc-15');
+  ucToUC('l-inc-11-14','uc-11','uc-14');
+  ucToUC('l-inc-16-06','uc-16','uc-06');
+  ucToUC('l-inc-16-07','uc-16','uc-07');
+  actorToUC('l-da-uc14','a-da','uc-14');
+  actorToUC('l-da-uc15','a-da','uc-15');
+  actorToUC('l-da-uc16','a-da','uc-16');
+
+  // UC17: Apply Report Filters
+  ucToUC('l-inc-09-17','uc-09','uc-17');
+  actorToUC('l-da-uc17','a-da','uc-17');
+  actorToUC('l-mm-uc17','a-mm','uc-17');
+  actorToUC('l-fo-uc17','a-fo','uc-17');
+
+  // UC18: Access Analytics Dashboard
+  ucToUC('l-inc-18-13','uc-18','uc-13');
+  ucToUC('l-inc-18-09','uc-18','uc-09');
+  actorToUC('l-da-uc18','a-da','uc-18');
+  actorToUC('l-mm-uc18','a-mm','uc-18');
+  actorToUC('l-fo-uc18','a-fo','uc-18');
+  actorToUC('l-gd-uc18','a-gd','uc-18');
+
+  updateLabels();
+}
+
+updateAllLines();
+
+// ─── Focus on use case ─────────────────────────────────────────
+function focusUC(id){
+  const el=document.getElementById(id);
+  const l=parseFloat(el.style.left||0);
+  const t=parseFloat(el.style.top||0);
+  panX=-(l*scale)+300;
+  panY=-(t*scale)+200;
+  applyTransform();
+  el.classList.add('dragging');
+  setTimeout(()=>el.classList.remove('dragging'),600);
+}
+
+// ─── Tooltip ──────────────────────────────────────────────────
+const tip=document.getElementById('tooltip');
+document.querySelectorAll('.uc[data-tip]').forEach(el=>{
+  el.addEventListener('mouseenter',e=>{
+    tip.textContent=el.dataset.tip;
+    tip.style.display='block';
+  });
+  el.addEventListener('mousemove',e=>{
+    tip.style.left=(e.clientX+14)+'px';
+    tip.style.top=(e.clientY-8)+'px';
+  });
+  el.addEventListener('mouseleave',()=>{tip.style.display='none'});
+});
+</script>
+</body>
+</html>
