@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GGG MTX UML – Visual Paradigm Reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0f2f5;font-family:'IBM Plex Sans',sans-serif;overflow:hidden;height:100vh;user-select:none}
+
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:48px;
+  background:#1e3a5f;color:white;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+}
+#topbar h1{font-size:13px;font-weight:600;letter-spacing:.02em}
+#topbar p{font-size:11px;color:#94b4d4}
+
+#canvas{
+  position:fixed;top:48px;left:0;right:280px;bottom:0;
+  overflow:hidden;cursor:default;
+}
+#world{
+  position:absolute;transform-origin:0 0;
+  width:3000px;height:2400px;
+}
+
+/* Arrow SVG fills the world */
+#arrows{
+  position:absolute;top:0;left:0;
+  width:3000px;height:2400px;
+  pointer-events:none;overflow:visible;
+}
+
+/* Class boxes */
+.cls{
+  position:absolute;
+  border-radius:4px;
+  background:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.14),0 0 0 1.5px #334155;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  cursor:move;
+  min-width:175px;
+}
+.cls:hover{box-shadow:0 2px 12px rgba(0,0,0,.18),0 0 0 2px #4a7eb5}
+.cls.dragging{box-shadow:0 8px 28px rgba(0,0,0,.22),0 0 0 2px #2563eb;z-index:100;opacity:.92}
+
+.ch{color:#fff;padding:5px 9px 4px;border-radius:4px 4px 0 0;border-bottom:1.5px solid rgba(0,0,0,.15)}
+.ch .st{font-size:8.5px;font-style:italic;opacity:.82;display:block}
+.ch .cn{font-size:11.5px;font-weight:700;display:block;white-space:nowrap}
+.ch.ab .cn{font-style:italic}
+.h-cls  {background:#1e3a5f}
+.h-abs  {background:#2d3748}
+.h-ifc  {background:#4c1d95}
+.h-enm  {background:#14532d}
+
+.sec{padding:4px 9px;border-bottom:1px solid #e5e7eb;line-height:1.75}
+.sec:last-child{border-bottom:none}
+.attr{color:#374151;white-space:nowrap}
+.mth {color:#1d4ed8;white-space:nowrap}
+.ev  {color:#15803d;font-weight:600}
+.em  {color:#b91c1c;font-weight:600}
+
+/* Sidebar */
+#side{
+  position:fixed;top:48px;right:0;width:280px;bottom:0;
+  background:#fff;border-left:1px solid #e2e8f0;
+  overflow-y:auto;padding:14px;z-index:150;
+}
+#side h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:#6b7280;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f1f5f9}
+.lr{display:flex;align-items:flex-start;gap:8px;margin-bottom:11px}
+.li{flex-shrink:0;width:58px;height:22px;display:flex;align-items:center}
+.lt .ln{font-size:11px;font-weight:600}
+.lt .ld{font-size:10px;color:#6b7280;line-height:1.35;margin-top:1px}
+.lt .lv{font-size:9.5px;color:#6d28d9;margin-top:2px;font-style:italic}
+.ct-row{display:flex;align-items:flex-start;gap:7px;padding:5px 0;
+  border-bottom:1px solid #f8fafc;font-size:11px;line-height:1.4}
+.ct-i{flex-shrink:0;font-size:13px}
+.ct-r .ct-n{font-weight:600}
+.ct-r .ct-d{font-size:10px;color:#6b7280;margin-top:1px}
+
+#controls{position:fixed;bottom:12px;left:8px;z-index:300;display:flex;gap:6px}
+.cb{background:#fff;border:1px solid #d1d5db;border-radius:6px;
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;color:#374151;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.cb:hover{background:#f1f5f9}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div>
+    <h1>⚙ GGG Microtransaction Analytics System — UML Class Diagram v4</h1>
+    <p>Drag any class box to reposition • Use this as your Visual Paradigm reference</p>
+  </div>
+  <p style="font-size:11px;color:#94b4d4">Scroll/pinch to zoom</p>
+</div>
+
+<div id="canvas">
+<div id="world">
+
+<!-- Arrow SVG layer -->
+<svg id="arrows" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="m-assoc" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M1,1 L9,4 L1,7" fill="none" stroke="#374151" stroke-width="1.6" stroke-linecap="round"/>
+  </marker>
+  <marker id="m-inherit" markerWidth="14" markerHeight="10" refX="13" refY="5" orient="auto">
+    <polygon points="0,0 13,5 0,10" fill="white" stroke="#b45309" stroke-width="1.5"/>
+  </marker>
+  <marker id="m-realize" markerWidth="14" markerHeight="10" refX="13" refY="5" orient="auto">
+    <polygon points="0,0 13,5 0,10" fill="white" stroke="#6d28d9" stroke-width="1.5"/>
+  </marker>
+  <marker id="m-dep" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M1,1 L9,4 L1,7" fill="none" stroke="#0369a1" stroke-width="1.6" stroke-linecap="round"/>
+  </marker>
+  <marker id="m-dia-f" markerWidth="14" markerHeight="10" refX="0" refY="5" orient="auto">
+    <polygon points="0,5 6,0 12,5 6,10" fill="#b91c1c" stroke="#b91c1c"/>
+  </marker>
+  <marker id="m-dia-o" markerWidth="14" markerHeight="10" refX="0" refY="5" orient="auto">
+    <polygon points="0,5 6,0 12,5 6,10" fill="white" stroke="#15803d" stroke-width="1.4"/>
+  </marker>
+  <marker id="m-assoc-end" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M1,1 L9,4 L1,7" fill="none" stroke="#374151" stroke-width="1.6" stroke-linecap="round"/>
+  </marker>
+  <marker id="m-compose-end" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M1,1 L9,4 L1,7" fill="none" stroke="#b91c1c" stroke-width="1.6" stroke-linecap="round"/>
+  </marker>
+  <marker id="m-aggreg-end" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M1,1 L9,4 L1,7" fill="none" stroke="#15803d" stroke-width="1.6" stroke-linecap="round"/>
+  </marker>
+</defs>
+</svg>
+
+<!-- ══════════════ CLASS BOXES ══════════════ -->
+
+<!-- SalesItem (Interface, was ISalesItem) -->
+<div class="cls" id="c-sales" style="left:520px;top:60px;width:205px">
+  <div class="ch h-ifc"><span class="st">«interface»</span><span class="cn">SalesItem</span></div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> getPrice() : float</div>
+    <div class="mth"><span class="ev">+</span> getItemType() : ItemType</div>
+    <div class="mth"><span class="ev">+</span> getSalesCount() : int</div>
+  </div>
+</div>
+
+<!-- MTXItem (Abstract) -->
+<div class="cls" id="c-mtx" style="left:490px;top:240px;width:230px">
+  <div class="ch h-abs ab"><span class="st">«abstract»</span><span class="cn">MTXItem</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> itemId : String</div>
+    <div class="attr"><span class="em">-</span> name : String</div>
+    <div class="attr"><span class="em">-</span> itemType : ItemType</div>
+    <div class="attr"><span class="em">-</span> price : float</div>
+    <div class="attr"><span class="em">-</span> releaseDate : Date</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> getPrice() : float</div>
+    <div class="mth"><span class="ev">+</span> getItemType() : ItemType</div>
+    <div class="mth"><span class="ev">+</span> getSalesCount() : int</div>
+  </div>
+</div>
+
+<!-- WeaponSkin -->
+<div class="cls" id="c-wskin" style="left:80px;top:530px;width:215px">
+  <div class="ch h-cls"><span class="cn">WeaponSkin</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> weaponClass : String</div>
+    <div class="attr"><span class="em">-</span> effectTier : int</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> applyToWeapon() : void</div>
+  </div>
+</div>
+
+<!-- ArmourSkin -->
+<div class="cls" id="c-askin" style="left:360px;top:530px;width:215px">
+  <div class="ch h-cls"><span class="cn">ArmourSkin</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> slotType : ArmourSlot</div>
+    <div class="attr"><span class="em">-</span> animSet : String</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> applyToArmour() : void</div>
+  </div>
+</div>
+
+<!-- PetItem -->
+<div class="cls" id="c-pet" style="left:650px;top:530px;width:200px">
+  <div class="ch h-cls"><span class="cn">PetItem</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> petName : String</div>
+    <div class="attr"><span class="em">-</span> idleAnim : String</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> follow() : void</div>
+  </div>
+</div>
+
+<!-- Bundle -->
+<div class="cls" id="c-bundle" style="left:80px;top:800px;width:220px">
+  <div class="ch h-cls"><span class="cn">Bundle</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> bundleId : String</div>
+    <div class="attr"><span class="em">-</span> bundleName : String</div>
+    <div class="attr"><span class="em">-</span> discountPct : float</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> getItems() : List&lt;MTXItem&gt;</div>
+    <div class="mth"><span class="ev">+</span> totalPrice() : float</div>
+  </div>
+</div>
+
+<!-- PortalEffect -->
+<div class="cls" id="c-portal" style="left:360px;top:800px;width:215px">
+  <div class="ch h-cls"><span class="cn">PortalEffect</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> effectStyle : String</div>
+    <div class="attr"><span class="em">-</span> soundPack : String</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> applyToPortal() : void</div>
+  </div>
+</div>
+
+<!-- StashTabExpansion -->
+<div class="cls" id="c-stash" style="left:80px;top:1010px;width:220px">
+  <div class="ch h-cls"><span class="cn">StashTabExpansion</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> tabType : String</div>
+    <div class="attr"><span class="em">-</span> tabCount : int</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> expandStash() : void</div>
+  </div>
+</div>
+
+<!-- HideoutDecoration -->
+<div class="cls" id="c-hide" style="left:650px;top:800px;width:220px">
+  <div class="ch h-cls"><span class="cn">HideoutDecoration</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> decorType : String</div>
+    <div class="attr"><span class="em">-</span> placementSlot : int</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> placeInHideout() : void</div>
+  </div>
+</div>
+
+<!-- Transaction -->
+<div class="cls" id="c-tx" style="left:940px;top:200px;width:235px">
+  <div class="ch h-cls"><span class="cn">Transaction</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> txId : String</div>
+    <div class="attr"><span class="em">-</span> timestamp : DateTime</div>
+    <div class="attr"><span class="em">-</span> price : float</div>
+    <div class="attr"><span class="em">-</span> bundleFlag : boolean</div>
+    <div class="attr"><span class="em">-</span> characterClass : CharacterClass</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> getItem() : SalesItem</div>
+    <div class="mth"><span class="ev">+</span> getPlayer() : PlayerAccount</div>
+    <div class="mth"><span class="ev">+</span> validate() : boolean</div>
+  </div>
+</div>
+
+<!-- PlayerAccount -->
+<div class="cls" id="c-player" style="left:940px;top:500px;width:240px">
+  <div class="ch h-cls"><span class="cn">PlayerAccount</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> accountId : String</div>
+    <div class="attr"><span class="em">-</span> username : String</div>
+    <div class="attr"><span class="em">-</span> region : String</div>
+    <div class="attr"><span class="em">-</span> accountAge : int</div>
+    <div class="attr"><span class="em">-</span> spendingTier : Tier</div>
+    <div class="attr"><span class="em">-</span> isFirstTimeBuyer : boolean</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> getPurchaseHistory() : List</div>
+    <div class="mth"><span class="ev">+</span> getCharClass() : CharacterClass</div>
+    <div class="mth"><span class="ev">+</span> getTier() : Tier</div>
+    <div class="mth"><span class="ev">+</span> isRepeatBuyer(item : SalesItem) : boolean</div>
+  </div>
+</div>
+
+<!-- CharacterClass enum -->
+<div class="cls" id="c-char" style="left:1270px;top:500px;width:210px">
+  <div class="ch h-enm"><span class="st">«enumeration»</span><span class="cn">CharacterClass</span></div>
+  <div class="sec">
+    <div class="attr" style="color:#15803d;font-weight:600">MARAUDER</div>
+    <div class="attr" style="color:#15803d;font-weight:600">RANGER</div>
+    <div class="attr" style="color:#15803d;font-weight:600">WITCH</div>
+    <div class="attr" style="color:#15803d;font-weight:600">DUELIST</div>
+    <div class="attr" style="color:#15803d;font-weight:600">TEMPLAR</div>
+    <div class="attr" style="color:#15803d;font-weight:600">SHADOW</div>
+    <div class="attr" style="color:#15803d;font-weight:600">SCION</div>
+  </div>
+</div>
+
+<!-- DemographicRecord -->
+<div class="cls" id="c-demo" style="left:1270px;top:200px;width:250px">
+  <div class="ch h-cls"><span class="cn">DemographicRecord</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> region : String</div>
+    <div class="attr"><span class="em">-</span> purchaseDate : Date</div>
+    <div class="attr"><span class="em">-</span> isRepeatBuyer : boolean</div>
+    <div class="attr"><span class="em">-</span> spendingTier : Tier</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> getRegion() : String</div>
+    <div class="mth"><span class="ev">+</span> isWhale() : boolean</div>
+  </div>
+</div>
+
+<!-- ReportGenerator (Interface, was IReportGenerator) -->
+<div class="cls" id="c-irep" style="left:430px;top:820px;width:215px">
+  <div class="ch h-ifc"><span class="st">«interface»</span><span class="cn">ReportGenerator</span></div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> generateReport() : Report</div>
+    <div class="mth"><span class="ev">+</span> exportCSV() : void</div>
+    <div class="mth"><span class="ev">+</span> applyFilter() : void</div>
+  </div>
+</div>
+
+<!-- ReportEngine -->
+<div class="cls" id="c-rep" style="left:430px;top:1050px;width:260px">
+  <div class="ch h-cls"><span class="cn">ReportEngine</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> filters : FilterSet</div>
+    <div class="attr"><span class="em">-</span> dateRange : DateRange</div>
+    <div class="attr"><span class="em">-</span> underperformThreshold : float</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> generateReport() : Report</div>
+    <div class="mth"><span class="ev">+</span> exportCSV() : void</div>
+    <div class="mth"><span class="ev">+</span> applyFilter() : void</div>
+    <div class="mth"><span class="ev">+</span> flagUnderperforming() : void</div>
+    <div class="mth"><span class="ev">+</span> getRevenueTrend(window : String) : List</div>
+  </div>
+</div>
+
+<!-- ExportService -->
+<div class="cls" id="c-export" style="left:780px;top:1070px;width:215px">
+  <div class="ch h-cls"><span class="cn">ExportService</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> format : ExportFormat</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> exportToCSV() : void</div>
+    <div class="mth"><span class="ev">+</span> exportToPDF() : void</div>
+  </div>
+</div>
+
+<!-- AnalyticsDashboard -->
+<div class="cls" id="c-dash" style="left:430px;top:1310px;width:245px">
+  <div class="ch h-cls"><span class="cn">AnalyticsDashboard</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> currentView : ViewType</div>
+    <div class="attr"><span class="em">-</span> dateRange : DateRange</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> loadSalesChart() : void</div>
+    <div class="mth"><span class="ev">+</span> loadDemoChart() : void</div>
+    <div class="mth"><span class="ev">+</span> refreshTrends() : void</div>
+  </div>
+</div>
+
+<!-- SystemUser -->
+<div class="cls" id="c-sysuser" style="left:80px;top:1060px;width:230px">
+  <div class="ch h-cls"><span class="cn">SystemUser</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> userId : String</div>
+    <div class="attr"><span class="em">-</span> username : String</div>
+    <div class="attr"><span class="em">-</span> passwordHash : String</div>
+    <div class="attr"><span class="em">-</span> role : UserRole</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> authenticate() : boolean</div>
+    <div class="mth"><span class="ev">+</span> getRole() : UserRole</div>
+    <div class="mth"><span class="ev">+</span> canExport() : boolean</div>
+    <div class="mth"><span class="ev">+</span> canConfigure() : boolean</div>
+  </div>
+</div>
+
+<!-- UserRole enum -->
+<div class="cls" id="c-role" style="left:80px;top:1310px;width:215px">
+  <div class="ch h-enm"><span class="st">«enumeration»</span><span class="cn">UserRole</span></div>
+  <div class="sec">
+    <div class="attr" style="color:#15803d;font-weight:600">ANALYST</div>
+    <div class="attr" style="color:#15803d;font-weight:600">MARKETING_MANAGER</div>
+    <div class="attr" style="color:#15803d;font-weight:600">DEVELOPER</div>
+    <div class="attr" style="color:#15803d;font-weight:600">FINANCE_OFFICER</div>
+  </div>
+</div>
+
+<!-- FilterSet (value class) -->
+<div class="cls" id="c-filterset" style="left:720px;top:1050px;width:230px">
+  <div class="ch h-cls"><span class="cn">FilterSet</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> region : String</div>
+    <div class="attr"><span class="em">-</span> itemType : ItemType</div>
+    <div class="attr"><span class="em">-</span> characterClass : CharacterClass</div>
+    <div class="attr"><span class="em">-</span> dateRange : DateRange</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> isValid() : boolean</div>
+  </div>
+</div>
+
+<!-- DateRange (value class) -->
+<div class="cls" id="c-daterange" style="left:720px;top:1290px;width:230px">
+  <div class="ch h-cls"><span class="cn">DateRange</span></div>
+  <div class="sec">
+    <div class="attr"><span class="em">-</span> startDate : Date</div>
+    <div class="attr"><span class="em">-</span> endDate : Date</div>
+    <div class="attr"><span class="em">-</span> granularity : String</div>
+  </div>
+  <div class="sec">
+    <div class="mth"><span class="ev">+</span> contains(d : Date) : boolean</div>
+    <div class="mth"><span class="ev">+</span> toDays() : int</div>
+  </div>
+</div>
+
+<!-- ItemType enum -->
+<div class="cls" id="c-itemtype" style="left:800px;top:60px;width:220px">
+  <div class="ch h-enm"><span class="st">«enumeration»</span><span class="cn">ItemType</span></div>
+  <div class="sec">
+    <div class="attr" style="color:#15803d;font-weight:600">WEAPON_SKIN</div>
+    <div class="attr" style="color:#15803d;font-weight:600">ARMOUR_SKIN</div>
+    <div class="attr" style="color:#15803d;font-weight:600">PET</div>
+    <div class="attr" style="color:#15803d;font-weight:600">PORTAL_EFFECT</div>
+    <div class="attr" style="color:#15803d;font-weight:600">HIDEOUT_DECORATION</div>
+    <div class="attr" style="color:#15803d;font-weight:600">STASH_TAB</div>
+    <div class="attr" style="color:#15803d;font-weight:600">BUNDLE</div>
+  </div>
+</div>
+
+<!-- Tier enum -->
+<div class="cls" id="c-tier" style="left:1260px;top:500px;width:200px">
+  <div class="ch h-enm"><span class="st">«enumeration»</span><span class="cn">Tier</span></div>
+  <div class="sec">
+    <div class="attr" style="color:#15803d;font-weight:600">CASUAL</div>
+    <div class="attr" style="color:#15803d;font-weight:600">REGULAR</div>
+    <div class="attr" style="color:#15803d;font-weight:600">HIGH_VALUE</div>
+  </div>
+</div>
+
+<!-- ArmourSlot enum -->
+<div class="cls" id="c-armourslot" style="left:100px;top:700px;width:200px">
+  <div class="ch h-enm"><span class="st">«enumeration»</span><span class="cn">ArmourSlot</span></div>
+  <div class="sec">
+    <div class="attr" style="color:#15803d;font-weight:600">HELM</div>
+    <div class="attr" style="color:#15803d;font-weight:600">CHEST</div>
+    <div class="attr" style="color:#15803d;font-weight:600">GLOVES</div>
+    <div class="attr" style="color:#15803d;font-weight:600">BOOTS</div>
+  </div>
+</div>
+
+<!-- ExportFormat enum -->
+<div class="cls" id="c-exportfmt" style="left:1060px;top:1120px;width:200px">
+  <div class="ch h-enm"><span class="st">«enumeration»</span><span class="cn">ExportFormat</span></div>
+  <div class="sec">
+    <div class="attr" style="color:#15803d;font-weight:600">CSV</div>
+    <div class="attr" style="color:#15803d;font-weight:600">PDF</div>
+    <div class="attr" style="color:#15803d;font-weight:600">JSON</div>
+  </div>
+</div>
+
+<!-- ViewType enum -->
+<div class="cls" id="c-viewtype" style="left:100px;top:1380px;width:210px">
+  <div class="ch h-enm"><span class="st">«enumeration»</span><span class="cn">ViewType</span></div>
+  <div class="sec">
+    <div class="attr" style="color:#15803d;font-weight:600">SALES</div>
+    <div class="attr" style="color:#15803d;font-weight:600">DEMOGRAPHIC</div>
+    <div class="attr" style="color:#15803d;font-weight:600">TREND</div>
+    <div class="attr" style="color:#15803d;font-weight:600">UNDERPERFORMING</div>
+  </div>
+</div>
+
+</div><!-- world -->
+</div><!-- canvas -->
+
+<!-- ══ SIDEBAR ══ -->
+<div id="side">
+  <h2>Relationship Types</h2>
+
+  <div class="lr">
+    <div class="li"><svg width="58" height="22" style="overflow:visible"><line x1="2" y1="11" x2="44" y2="11" stroke="#374151" stroke-width="1.6"/><path d="M38,7 L48,11 L38,15" fill="none" stroke="#374151" stroke-width="1.6"/></svg></div>
+    <div class="lt"><div class="ln" style="color:#374151">Association</div><div class="ld">Classes know each other. Solid + open arrow.</div><div class="lv">VP → Relationship → Association</div></div>
+  </div>
+
+  <div class="lr">
+    <div class="li"><svg width="58" height="22" style="overflow:visible"><line x1="2" y1="11" x2="40" y2="11" stroke="#b45309" stroke-width="1.6"/><polygon points="42,11 32,6 32,16" fill="white" stroke="#b45309" stroke-width="1.5"/></svg></div>
+    <div class="lt"><div class="ln" style="color:#b45309">Inheritance</div><div class="ld">Child extends parent. Solid + hollow triangle.</div><div class="lv">VP → Relationship → Generalization</div></div>
+  </div>
+
+  <div class="lr">
+    <div class="li"><svg width="58" height="22" style="overflow:visible"><polygon points="2,11 8,6 14,11 8,16" fill="#b91c1c" stroke="#b91c1c"/><line x1="14" y1="11" x2="44" y2="11" stroke="#b91c1c" stroke-width="1.6"/><path d="M38,7 L48,11 L38,15" fill="none" stroke="#b91c1c" stroke-width="1.6"/></svg></div>
+    <div class="lt"><div class="ln" style="color:#b91c1c">Composition</div><div class="ld">Strong part-of. Filled ◆ at owner end.</div><div class="lv">VP → Relationship → Composition</div></div>
+  </div>
+
+  <div class="lr">
+    <div class="li"><svg width="58" height="22" style="overflow:visible"><polygon points="2,11 8,6 14,11 8,16" fill="white" stroke="#15803d" stroke-width="1.4"/><line x1="14" y1="11" x2="44" y2="11" stroke="#15803d" stroke-width="1.6"/><path d="M38,7 L48,11 L38,15" fill="none" stroke="#15803d" stroke-width="1.6"/></svg></div>
+    <div class="lt"><div class="ln" style="color:#15803d">Aggregation</div><div class="ld">Weak has-a. Open ◇ at container end.</div><div class="lv">VP → Relationship → Aggregation</div></div>
+  </div>
+
+  <div class="lr">
+    <div class="li"><svg width="58" height="22" style="overflow:visible"><line x1="2" y1="11" x2="40" y2="11" stroke="#6d28d9" stroke-width="1.6" stroke-dasharray="5,3"/><polygon points="42,11 32,6 32,16" fill="white" stroke="#6d28d9" stroke-width="1.5"/></svg></div>
+    <div class="lt"><div class="ln" style="color:#6d28d9">Realization</div><div class="ld">Implements interface. Dashed + hollow triangle.</div><div class="lv">VP → Relationship → Realization</div></div>
+  </div>
+
+  <div class="lr">
+    <div class="li"><svg width="58" height="22" style="overflow:visible"><line x1="2" y1="11" x2="44" y2="11" stroke="#0369a1" stroke-width="1.6" stroke-dasharray="5,3"/><path d="M38,7 L48,11 L38,15" fill="none" stroke="#0369a1" stroke-width="1.6"/></svg></div>
+    <div class="lt"><div class="ln" style="color:#0369a1">Dependency</div><div class="ld">Temporary use. Dashed + open arrow. Label: «uses»</div><div class="lv">VP → Relationship → Dependency</div></div>
+  </div>
+
+  <h2 style="margin-top:16px">VP Draw Checklist</h2>
+
+  <div class="ct-row"><span class="ct-i">🟦</span><div class="ct-r"><div class="ct-n">Create all 27 class boxes</div><div class="ct-d">Set stereotype (interface / enumeration / abstract)</div></div></div>
+  <div class="ct-row"><span class="ct-i">📝</span><div class="ct-r"><div class="ct-n">Add all attributes (- private)</div><div class="ct-d">Visibility symbols: + public, - private</div></div></div>
+  <div class="ct-row"><span class="ct-i">📝</span><div class="ct-r"><div class="ct-n">Add all methods (+ public)</div><div class="ct-d">Include return types</div></div></div>
+  <div class="ct-row"><span class="ct-i">🔶</span><div class="ct-r"><div class="ct-n">Inheritance arrows (×6) — NO label</div><div class="ct-d">WeaponSkin, ArmourSkin, PetItem, PortalEffect, HideoutDecoration, StashTabExpansion → MTXItem</div></div></div>
+  <div class="ct-row"><span class="ct-i">🟣</span><div class="ct-r"><div class="ct-n">Realization arrows (×3) — NO label</div><div class="ct-d">MTXItem → SalesItem; Bundle → SalesItem; ReportEngine → ReportGenerator</div></div></div>
+  <div class="ct-row"><span class="ct-i">🔴</span><div class="ct-r"><div class="ct-n">Composition arrows (×4)</div><div class="ct-d">Transaction◆→MTXItem (1 to 1), Dashboard◆→ReportEngine (1 to 1..*), ReportEngine◆→FilterSet (1 to 1), FilterSet◆→DateRange (1 to 1)</div></div></div>
+  <div class="ct-row"><span class="ct-i">🟢</span><div class="ct-r"><div class="ct-n">Aggregation arrow (×1)</div><div class="ct-d">Bundle ◇→ MTXItem (1 to 2..*)</div></div></div>
+  <div class="ct-row"><span class="ct-i">⬛</span><div class="ct-r"><div class="ct-n">Association arrows (×3)</div><div class="ct-d">Transaction→PlayerAccount (* to 1), PlayerAccount→CharacterClass (* to 1), SystemUser→UserRole (1 to 1)</div></div></div>
+  <div class="ct-row"><span class="ct-i">🔵</span><div class="ct-r"><div class="ct-n">Dependency arrows (×3) «uses»</div><div class="ct-d">Transaction→ReportEngine, ReportEngine→ExportService, SystemUser→AnalyticsDashboard</div></div></div>
+  <div class="ct-row"><span class="ct-i">🔵</span><div class="ct-r"><div class="ct-n">Enum dependency arrows (×10) «use»</div><div class="ct-d">MTXItem→ItemType, FilterSet→ItemType, PlayerAccount→Tier, DemographicRecord→Tier, ArmourSkin→ArmourSlot, ExportService→ExportFormat, AnalyticsDashboard→ViewType, Transaction→CharacterClass, FilterSet→CharacterClass, SystemUser→UserRole</div></div></div>
+  <div class="ct-row"><span class="ct-i">⬛</span><div class="ct-r"><div class="ct-n">Association: DemographicRecord → Transaction (* to 1)</div><div class="ct-d">Demographics captured per transaction, not per player</div></div></div>
+  <div class="ct-row"><span class="ct-i">⚠️</span><div class="ct-r"><div class="ct-n">Add multiplicities at both ends</div><div class="ct-d">Double-click line in VP to set multiplicity on each end</div></div></div>
+  <div class="ct-row"><span class="ct-i">🚫</span><div class="ct-r"><div class="ct-n">No labels on Generalization/Realization</div><div class="ct-d">The arrow shape itself communicates the relationship — no «extends» or «realizes» needed</div></div></div>
+</div>
+
+<!-- Zoom controls -->
+<div id="controls">
+  <div class="cb" id="btn-in" title="Zoom in">+</div>
+  <div class="cb" id="btn-out" title="Zoom out">−</div>
+  <div class="cb" id="btn-reset" title="Reset" style="font-size:11px">⌂</div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────
+let scale = 0.62, panX = 30, panY = 20;
+const canvas = document.getElementById('canvas');
+const world  = document.getElementById('world');
+const svg    = document.getElementById('arrows');
+
+// ── Relationship definitions ──────────────────────────────────────────
+// { from, to, type, label, mult_from, mult_to }
+// types: assoc | inherit | compose | aggreg | realize | depend
+const RELS = [
+  // Realization (no label — hollow triangle + dashed line is self-explanatory)
+  {id:'r1',  from:'c-mtx',      to:'c-sales',   type:'realize'},
+  {id:'r2',  from:'c-rep',      to:'c-irep',    type:'realize'},
+  {id:'r20', from:'c-bundle',   to:'c-sales',   type:'realize'},
+  // Inheritance (no label — hollow triangle on solid line is self-explanatory)
+  {id:'r3',  from:'c-wskin',    to:'c-mtx',     type:'inherit'},
+  {id:'r4',  from:'c-askin',    to:'c-mtx',     type:'inherit'},
+  {id:'r5',  from:'c-pet',      to:'c-mtx',     type:'inherit'},
+  {id:'r15', from:'c-portal',   to:'c-mtx',     type:'inherit'},
+  {id:'r16', from:'c-hide',     to:'c-mtx',     type:'inherit'},
+  {id:'r21', from:'c-stash',    to:'c-mtx',     type:'inherit'},
+  // Composition
+  {id:'r6',  from:'c-tx',       to:'c-mtx',     type:'compose', label:'1   1'},
+  {id:'r8',  from:'c-dash',     to:'c-rep',     type:'compose', label:'1   1..*'},
+  {id:'r22', from:'c-filterset',to:'c-daterange',type:'compose', label:'1   1'},
+  // Aggregation (Bundle loosely groups MTXItems)
+  {id:'r9',  from:'c-bundle',   to:'c-mtx',     type:'aggreg',  label:'1   2..*'},
+  // Association
+  {id:'r7',  from:'c-tx',       to:'c-player',  type:'assoc',   label:'*   1'},
+  {id:'r10', from:'c-player',   to:'c-char',    type:'assoc',   label:'*   1'},
+  {id:'r11', from:'c-demo',     to:'c-tx',      type:'assoc',   label:'*   1'},
+  {id:'r18', from:'c-sysuser',  to:'c-dash',    type:'depend',  label:'«uses»'},
+  // Dependency
+  {id:'r13', from:'c-tx',       to:'c-rep',     type:'depend',  label:'«uses»'},
+  {id:'r14', from:'c-rep',      to:'c-export',  type:'depend',  label:'«uses»'},
+  // Composition: ReportEngine composes FilterSet
+  {id:'r23', from:'c-rep',      to:'c-filterset',type:'compose', label:'1   1'},
+
+  // ── Enum dependencies («use» — class depends on enum type) ──────────
+  // ItemType
+  {id:'e1',  from:'c-mtx',      to:'c-itemtype',  type:'depend', label:'«use»'},
+  {id:'e2',  from:'c-filterset',to:'c-itemtype',  type:'depend', label:'«use»'},
+  // Tier
+  {id:'e3',  from:'c-player',   to:'c-tier',      type:'depend', label:'«use»'},
+  {id:'e4',  from:'c-demo',     to:'c-tier',      type:'depend', label:'«use»'},
+  // ArmourSlot
+  {id:'e5',  from:'c-askin',    to:'c-armourslot',type:'depend', label:'«use»'},
+  // ExportFormat
+  {id:'e6',  from:'c-export',   to:'c-exportfmt', type:'depend', label:'«use»'},
+  // ViewType
+  {id:'e7',  from:'c-dash',     to:'c-viewtype',  type:'depend', label:'«use»'},
+  // CharacterClass
+  {id:'e8',  from:'c-tx',       to:'c-char',      type:'depend', label:'«use»'},
+  {id:'e9',  from:'c-filterset',to:'c-char',      type:'depend', label:'«use»'},
+  // UserRole
+  {id:'e10', from:'c-sysuser',  to:'c-role',      type:'depend', label:'«use»'},
+];
+
+// Colour per type
+const TCOL = {
+  assoc:'#374151', inherit:'#b45309', compose:'#b91c1c',
+  aggreg:'#15803d', realize:'#6d28d9', depend:'#0369a1'
+};
+const TDASH = { realize:'8,5', depend:'8,5' };
+
+// ── Get centre of a DOM element in world coords ───────────────────────
+function boxRect(id) {
+  const el = document.getElementById(id);
+  return {
+    x: el.offsetLeft, y: el.offsetTop,
+    w: el.offsetWidth, h: el.offsetHeight
+  };
+}
+
+function anchor(r, side) {
+  // side: t b l r cx cy
+  return {
+    t:  {x: r.x + r.w/2, y: r.y},
+    b:  {x: r.x + r.w/2, y: r.y + r.h},
+    l:  {x: r.x,         y: r.y + r.h/2},
+    r:  {x: r.x + r.w,   y: r.y + r.h/2},
+    cx: r.x + r.w/2,
+    cy: r.y + r.h/2
+  }[side];
+}
+
+// Pick best anchor pair based on relative position
+function bestAnchors(ra, rb) {
+  const ax = ra.x+ra.w/2, ay = ra.y+ra.h/2;
+  const bx = rb.x+rb.w/2, by = rb.y+rb.h/2;
+  const dx = bx-ax, dy = by-ay;
+
+  if (Math.abs(dx) > Math.abs(dy)*1.4) {
+    return dx>0
+      ? [{x:ra.x+ra.w, y:ay}, {x:rb.x, y:by}]
+      : [{x:ra.x,      y:ay}, {x:rb.x+rb.w, y:by}];
+  } else {
+    return dy>0
+      ? [{x:ax, y:ra.y+ra.h}, {x:bx, y:rb.y}]
+      : [{x:ax, y:ra.y},      {x:bx, y:rb.y+rb.h}];
+  }
+}
+
+// ── Draw all arrows ───────────────────────────────────────────────────
+function drawArrows() {
+  // Remove all existing arrow elements (lines, paths, texts, polygons)
+  while (svg.children.length > 1) svg.removeChild(svg.lastChild); // keep defs
+
+  RELS.forEach(rel => {
+    const ra = boxRect(rel.from);
+    const rb = boxRect(rel.to);
+    const col = TCOL[rel.type];
+    const dash = TDASH[rel.type] || 'none';
+    const lw = 1.7;
+
+    const [pa, pb] = bestAnchors(ra, rb);
+
+    // Offset source point for diamond markers (they add visual space)
+    let x1=pa.x, y1=pa.y, x2=pb.x, y2=pb.y;
+
+    // Determine arrowheads
+    let markerEnd='', markerStart='';
+    let drawDiamond = null;  // {x,y,type,col}
+
+    if (rel.type === 'inherit' || rel.type === 'realize') {
+      markerEnd = rel.type==='inherit' ? 'url(#m-inherit)' : 'url(#m-realize)';
+    } else if (rel.type === 'depend') {
+      markerEnd = 'url(#m-dep)';
+    } else if (rel.type === 'assoc') {
+      markerEnd = 'url(#m-assoc)';
+    } else if (rel.type === 'compose' || rel.type === 'aggreg') {
+      markerEnd = rel.type==='compose' ? 'url(#m-compose-end)' : 'url(#m-aggreg-end)';
+      drawDiamond = {x:x1, y:y1, filled: rel.type==='compose', col};
+    }
+
+    // Draw the main line
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    // Shorten start slightly for diamonds
+    if (drawDiamond) {
+      const len = Math.sqrt((x2-x1)**2+(y2-y1)**2);
+      if (len > 0) {
+        const ux=(x2-x1)/len, uy=(y2-y1)/len;
+        x1 += ux*14; y1 += uy*14;
+      }
+    }
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('stroke', col);
+    line.setAttribute('stroke-width', lw);
+    if (dash !== 'none') line.setAttribute('stroke-dasharray', dash);
+    line.setAttribute('marker-end', markerEnd);
+    svg.appendChild(line);
+
+    // Draw diamond
+    if (drawDiamond) {
+      const ox=pa.x, oy=pa.y;
+      const len2 = Math.sqrt((x2-ox)**2+(y2-oy)**2);
+      if (len2 > 0) {
+        const ux=(x2-ox)/len2, uy=(y2-oy)/len2;
+        const px=-uy*5, py=ux*5;
+        const pts = [
+          [ox, oy],
+          [ox+ux*7+px, oy+uy*7+py],
+          [ox+ux*14, oy+uy*14],
+          [ox+ux*7-px, oy+uy*7-py]
+        ].map(p=>p.join(',')).join(' ');
+        const dia = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+        dia.setAttribute('points', pts);
+        dia.setAttribute('fill', drawDiamond.filled ? col : 'white');
+        dia.setAttribute('stroke', col);
+        dia.setAttribute('stroke-width', 1.4);
+        svg.appendChild(dia);
+      }
+    }
+
+    // Draw label at midpoint
+    if (rel.label) {
+      const mx = (pa.x+pb.x)/2, my = (pa.y+pb.y)/2;
+      // Small white bg rect behind text
+      const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      bg.setAttribute('x', mx-30); bg.setAttribute('y', my-9);
+      bg.setAttribute('width', 60); bg.setAttribute('height', 14);
+      bg.setAttribute('fill', 'white'); bg.setAttribute('rx', 2);
+      svg.appendChild(bg);
+
+      const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x', mx); txt.setAttribute('y', my);
+      txt.setAttribute('text-anchor','middle');
+      txt.setAttribute('dominant-baseline','central');
+      txt.setAttribute('font-size','9');
+      txt.setAttribute('font-style','italic');
+      txt.setAttribute('fill', col);
+      txt.setAttribute('font-family','IBM Plex Mono, monospace');
+      txt.textContent = rel.label;
+      svg.appendChild(txt);
+    }
+  });
+}
+
+// ── Apply pan/zoom transform ──────────────────────────────────────────
+function applyTransform() {
+  world.style.transform = `translate(${panX}px,${panY}px) scale(${scale})`;
+}
+
+// ── Dragging boxes ────────────────────────────────────────────────────
+let dragging = null, dragOffX=0, dragOffY=0;
+
+document.querySelectorAll('.cls').forEach(el => {
+  el.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    e.stopPropagation();
+    dragging = el;
+    el.classList.add('dragging');
+    const rect = el.getBoundingClientRect();
+    dragOffX = (e.clientX - rect.left);
+    dragOffY = (e.clientY - rect.top);
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragUp);
+  });
+});
+
+function onDragMove(e) {
+  if (!dragging) return;
+  const canvasRect = canvas.getBoundingClientRect();
+  const nx = (e.clientX - canvasRect.left - panX - dragOffX) / scale;
+  const ny = (e.clientY - canvasRect.top  - panY - dragOffY) / scale;
+  dragging.style.left = Math.max(0, nx) + 'px';
+  dragging.style.top  = Math.max(0, ny) + 'px';
+  drawArrows();
+}
+
+function onDragUp() {
+  if (dragging) { dragging.classList.remove('dragging'); dragging = null; }
+  document.removeEventListener('mousemove', onDragMove);
+  document.removeEventListener('mouseup', onDragUp);
+}
+
+// ── Canvas panning ────────────────────────────────────────────────────
+let panning = false, panStartX=0, panStartY=0, panOrigX=0, panOrigY=0;
+
+canvas.addEventListener('mousedown', e => {
+  if (e.target.closest('.cls')) return;
+  panning = true;
+  canvas.style.cursor = 'grabbing';
+  panStartX = e.clientX; panStartY = e.clientY;
+  panOrigX = panX; panOrigY = panY;
+});
+document.addEventListener('mousemove', e => {
+  if (!panning) return;
+  panX = panOrigX + (e.clientX - panStartX);
+  panY = panOrigY + (e.clientY - panStartY);
+  applyTransform();
+});
+document.addEventListener('mouseup', () => {
+  panning = false; canvas.style.cursor = 'default';
+});
+
+// ── Scroll to zoom ────────────────────────────────────────────────────
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 0.92 : 1.09;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  panX = mx - (mx - panX) * factor;
+  panY = my - (my - panY) * factor;
+  scale = Math.min(2.5, Math.max(0.22, scale * factor));
+  applyTransform();
+  drawArrows();
+}, {passive:false});
+
+// ── Zoom buttons ──────────────────────────────────────────────────────
+document.getElementById('btn-in').addEventListener('click', () => {
+  scale = Math.min(2.5, scale * 1.12); applyTransform(); drawArrows();
+});
+document.getElementById('btn-out').addEventListener('click', () => {
+  scale = Math.max(0.22, scale * 0.88); applyTransform(); drawArrows();
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  scale = 0.62; panX = 30; panY = 20; applyTransform(); drawArrows();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────
+applyTransform();
+// Wait a frame for layout to settle before drawing
+requestAnimationFrame(() => { requestAnimationFrame(drawArrows); });
+</script>
+</body>
+</html>
