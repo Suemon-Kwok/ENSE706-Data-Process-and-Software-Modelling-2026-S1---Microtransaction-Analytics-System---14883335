@@ -1,0 +1,4 @@
+C:\Users\OEM\Desktop\Software engineering degree\Year 2\Semester 1\Data processing and software modelling\Assignment 1\Code\GGG_MAS_Complete\GGG_MAS\obj\Debug\net8.0-windows\GGG_MAS.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\OEM\Desktop\Software engineering degree\Year 2\Semester 1\Data processing and software modelling\Assignment 1\Code\GGG_MAS_Complete\GGG_MAS\obj\Debug\net8.0-windows\GGG_MAS.AssemblyInfoInputs.cache
+C:\Users\OEM\Desktop\Software engineering degree\Year 2\Semester 1\Data processing and software modelling\Assignment 1\Code\GGG_MAS_Complete\GGG_MAS\obj\Debug\net8.0-windows\GGG_MAS.AssemblyInfo.cs
+C:\Users\OEM\Desktop\Software engineering degree\Year 2\Semester 1\Data processing and software modelling\Assignment 1\Code\GGG_MAS_Complete\GGG_MAS\obj\Debug\net8.0-windows\GGG_MAS.csproj.CoreCompileInputs.cache
