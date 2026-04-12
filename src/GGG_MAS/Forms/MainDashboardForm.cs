@@ -289,30 +289,42 @@ namespace GGG_MAS.Forms
                 {_cardRevenue,_cardTxCount,_cardBundlePct,_cardTopItem});
             _viewSales.Controls.Add(pCards);
 
-            // Grid titles row
-            var pTitles = new Panel { Dock=DockStyle.Top, Height=26, BackColor=Color.Transparent };
-            var t1=GridTitle("🏆  Top Sellers by Category (BR-01)"); t1.Location=new Point(0,2);
-            var t2=GridTitle("🎮  Top by Class (BR-02)");            t2.Location=new Point(460,2);
-            pTitles.Controls.Add(t1); pTitles.Controls.Add(t2);
-            _viewSales.Controls.Add(pTitles);
+            // Two side-by-side grid panels using Dock Left + Dock Fill.
+            // Avoids SplitContainer which crashes if the form has no size yet.
 
-            // SplitContainer keeps both grids equally sized and resizable
-            var sc = new SplitContainer
+            // Left panel — docks left, takes 50% width via Resize event
+            var pLeft = new Panel { Dock=DockStyle.Left, BackColor=ColBg, Width=500 };
+            var lblCat = GridTitle("🏆  Top Sellers by Category (BR-01)");
+            lblCat.Dock = DockStyle.Top;
+            lblCat.Height = 24;
+            _dgvTopCategory = MakeGrid();
+            _dgvTopCategory.Dock = DockStyle.Fill;
+            pLeft.Controls.Add(_dgvTopCategory);   // Fill added first
+            pLeft.Controls.Add(lblCat);            // Top stacks above it
+
+            // Right panel — fills the remaining space
+            var pRight = new Panel { Dock=DockStyle.Fill, BackColor=ColBg };
+            var lblCls = GridTitle("🎮  Top by Class (BR-02)");
+            lblCls.Dock = DockStyle.Top;
+            lblCls.Height = 24;
+            _dgvTopClass = MakeGrid();
+            _dgvTopClass.Dock = DockStyle.Fill;
+            pRight.Controls.Add(_dgvTopClass);     // Fill added first
+            pRight.Controls.Add(lblCls);           // Top stacks above it
+
+            // Outer row panel holds both side-by-side
+            var pGridRow = new Panel { Dock=DockStyle.Fill, BackColor=ColBg, Padding=new Padding(0,4,0,0) };
+            pGridRow.Controls.Add(pRight);   // Fill — added first
+            pGridRow.Controls.Add(pLeft);    // Left — docks to left side
+
+            // Keep left panel at exactly 50% when form is resized
+            pGridRow.Resize += (s,e) =>
             {
-                Dock=DockStyle.Fill, BackColor=ColBg,
-                BorderStyle=BorderStyle.None, SplitterWidth=10,
-                Panel1MinSize=180, Panel2MinSize=180
+                if (pGridRow.Width > 20)
+                    pLeft.Width = pGridRow.Width / 2 - 5;
             };
-            sc.Panel1.BackColor=ColBg;
-            sc.Panel2.BackColor=ColBg;
 
-            _dgvTopCategory=MakeGrid(); _dgvTopCategory.Dock=DockStyle.Fill;
-            sc.Panel1.Controls.Add(_dgvTopCategory);
-
-            _dgvTopClass=MakeGrid(); _dgvTopClass.Dock=DockStyle.Fill;
-            sc.Panel2.Controls.Add(_dgvTopClass);
-
-            _viewSales.Controls.Add(sc);
+            _viewSales.Controls.Add(pGridRow);
         }
 
         // ── Demographics ──────────────────────────────────────
