@@ -38,6 +38,10 @@ namespace GGG_MAS.Forms
         private Button _btnLogout    = null!;
         private Label  _lblUserInfo  = null!;
 
+        // Sidebar collapse/expand toggle
+        private Button _btnToggle      = null!;  // arrow in top-bar
+        private bool   _sidebarVisible = true;   // current state
+
         // ── Filter controls ───────────────────────────────────
         private ComboBox       _cmbRegion    = null!;
         private ComboBox       _cmbItemType  = null!;
@@ -180,6 +184,24 @@ namespace GGG_MAS.Forms
                 AutoSize=true, Location=new Point(880,18)
             };
             _pnlTopBar.Controls.Add(_lblUserInfo);
+
+            // Toggle button: collapses/expands the sidebar
+            // Anchored to the right edge of the top bar so it never overlaps content
+            _btnToggle = new Button
+            {
+                Text      = "◀",   // left arrow = sidebar is open
+                Font      = new Font("Segoe UI", 11, FontStyle.Bold),
+                BackColor = Color.FromArgb(50, 80, 120),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Size      = new Size(34, 34),
+                Location  = new Point(4, 9),  // left side of top-bar
+                Cursor    = Cursors.Hand,
+                Tag       = "toggle"
+            };
+            _btnToggle.FlatAppearance.BorderSize = 0;
+            _btnToggle.Click += ToggleSidebar;
+            _pnlTopBar.Controls.Add(_btnToggle);
 
             // Filter bar — 76px tall, two-row (label on top, control below)
             _pnlFilters = new Panel { Dock=DockStyle.Top, Height=76, BackColor=ColFilt };
@@ -553,6 +575,20 @@ namespace GGG_MAS.Forms
         }
 
         private void Logout(){_auth.Logout();Close();}
+
+        // ═══════════════ SIDEBAR TOGGLE
+
+        // Slides the sidebar in or out and flips the arrow direction
+        private void ToggleSidebar(object? sender, EventArgs e)
+        {
+            _sidebarVisible = !_sidebarVisible;
+
+            // Show or hide the sidebar panel
+            _pnlSidebar.Visible = _sidebarVisible;
+
+            // Flip the arrow: ◀ when open (click to close), ▶ when closed (click to open)
+            _btnToggle.Text = _sidebarVisible ? "◀" : "▶";
+        }
 
         // ═══════════════ NAVIGATION ══════════════════════════
 
