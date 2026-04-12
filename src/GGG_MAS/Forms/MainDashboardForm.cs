@@ -717,7 +717,8 @@ namespace GGG_MAS.Forms
                 Font                 = new Font("Segoe UI", 9),
                 ForeColor            = Color.FromArgb(226, 232, 240),
                 GridColor            = Color.FromArgb(40, 55, 75),
-                Size                 = new Size(460, 400)
+                Size                 = new Size(460, 400),
+                RowHeadersVisible    = false   // hides the left ▶ row selector column
             };
 
             // Header style
