@@ -193,12 +193,12 @@ namespace GGG_MAS.Forms
             {
                 Text="⚙  GGG Microtransaction Analytics System",
                 Font=new Font("Segoe UI",13,FontStyle.Bold),
-                ForeColor=ColAccent, AutoSize=true, Location=new Point(16,13)
+                ForeColor=ColAccent, AutoSize=true, Location=new Point(50,13)
             });
             _lblUserInfo = new Label
             {
                 Font=new Font("Segoe UI",9), ForeColor=ColMuted,
-                AutoSize=true, Location=new Point(880,18)
+                AutoSize=true, Location=new Point(950,18)
             };
             _pnlTopBar.Controls.Add(_lblUserInfo);
 
@@ -229,7 +229,7 @@ namespace GGG_MAS.Forms
         private void BuildFilters()
         {
             // Column start positions
-            int[] xs   = { 12, 120, 232, 348, 474, 594 };
+            int[] xs   = { 50, 158, 270, 386, 512, 632 };
             int[] ws   = { 96,  96, 104, 114, 108,  86 };
             var labels = new[]{"From","To","Region","Type","Class","Group"};
 
@@ -277,7 +277,7 @@ namespace GGG_MAS.Forms
                 BackColor=ColAccent, ForeColor=Color.White,
                 FlatStyle=FlatStyle.Flat,
                 Size=new Size(96,42),          // large and prominent
-                Location=new Point(694,17),    // vertically centred
+                Location=new Point(744,17),    // vertically centred
                 Cursor=Cursors.Hand
             };
             _btnRefresh.FlatAppearance.BorderSize=0;
@@ -309,6 +309,10 @@ namespace GGG_MAS.Forms
             pCards.Controls.AddRange(new Control[]
                 {_cardRevenue,_cardTxCount,_cardBundlePct,_cardTopItem});
             _viewSales.Controls.Add(pCards);
+
+            // Spacer between stat cards and the grids below (prevents overlap)
+            _viewSales.Controls.Add(new Panel
+                { Dock=DockStyle.Top, Height=16, BackColor=Color.Transparent });
 
             // Two side-by-side grid panels using Dock Left + Dock Fill.
             // Avoids SplitContainer which crashes if the form has no size yet.
