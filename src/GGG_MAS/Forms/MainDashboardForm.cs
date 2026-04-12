@@ -59,11 +59,12 @@ namespace GGG_MAS.Forms
         private DataGridView _dgvTrends        = null!;
         private DataGridView _dgvUnderperf     = null!;
 
-        // ── Summary stat labels ───────────────────────────────
-        private Label _lblRevenue    = null!;
-        private Label _lblTxCount    = null!;
-        private Label _lblBundlePct  = null!;
-        private Label _lblTopItem    = null!;
+        // ── Summary stat card panels ──────────────────────────
+        // Each card is a Panel containing two Labels (title + value)
+        private Panel _lblRevenue    = null!;
+        private Panel _lblTxCount    = null!;
+        private Panel _lblBundlePct  = null!;
+        private Panel _lblTopItem    = null!;
 
         // ── Services & data ───────────────────────────────────
         private readonly AuthService           _auth;
@@ -656,7 +657,8 @@ namespace GGG_MAS.Forms
         }
 
         // Creates a KPI stat card panel with two stacked labels
-        private static Label MakeStatCard(string title, string value, int x)
+        // Returns Panel — fields _lblRevenue etc. are typed as Panel to match
+        private static Panel MakeStatCard(string title, string value, int x)
         {
             var pnl = new Panel
             {
@@ -688,16 +690,13 @@ namespace GGG_MAS.Forms
             return pnl;
         }
 
-        // Finds the value label inside a stat card and updates its text
-        private static void UpdateStatCard(Label card, string newValue)
+        // Walks the stat card Panel's children to update the orange value label
+        private static void UpdateStatCard(Panel card, string newValue)
         {
-            // The card is actually a Panel — iterate children to find the value label
-            if (card is Panel pnl)
-            {
-                foreach (Control c in pnl.Controls)
-                    if (c is Label lbl && (string?)lbl.Tag == "value")
-                        lbl.Text = newValue;
-            }
+            // Iterate child controls and find the one tagged "value"
+            foreach (Control c in card.Controls)
+                if (c is Label lbl && (string?)lbl.Tag == "value")
+                    lbl.Text = newValue;
         }
 
         // Styled DataGridView factory
