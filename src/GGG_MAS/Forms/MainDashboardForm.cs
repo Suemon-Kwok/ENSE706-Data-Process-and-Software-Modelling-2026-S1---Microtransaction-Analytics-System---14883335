@@ -230,68 +230,76 @@ namespace GGG_MAS.Forms
         }
 
         // ── Filter bar (FR09) ─────────────────────────────────
+        // Uses TableLayoutPanel so controls resize cleanly with the window
+        // and the Apply button is always fully visible.
         private void BuildFilterBar()
         {
             var pnlFilters = new Panel
             {
                 Dock      = DockStyle.Top,
-                Height    = 60,
-                BackColor = Color.FromArgb(22, 32, 50),
-                Padding   = new Padding(8, 6, 8, 6)
+                Height    = 62,
+                BackColor = Color.FromArgb(22, 32, 50)
             };
 
+            // Helper: stacked label + control pair at position x
             int x = 8;
+            void AddPair(string labelText, Control ctrl, int colWidth)
+            {
+                var lbl = new Label
+                {
+                    Text      = labelText,
+                    Font      = new Font("Segoe UI", 7.5f),
+                    ForeColor = Color.FromArgb(148, 180, 212),
+                    AutoSize  = true,
+                    Location  = new Point(x, 8)
+                };
+                ctrl.Location = new Point(x, 28);
+                pnlFilters.Controls.Add(lbl);
+                pnlFilters.Controls.Add(ctrl);
+                x += colWidth;
+            }
 
-            // Date from
-            pnlFilters.Controls.Add(MakeFilterLabel("From:", x, 10));
+            // From date
             _dtpFrom = new DateTimePicker { Format = DateTimePickerFormat.Short,
-                Location = new Point(x + 38, 8), Width = 100,
-                Value = DateTime.Today.AddDays(-30) };
-            _dtpFrom.BackColor = ColGrid;
-            pnlFilters.Controls.Add(_dtpFrom); x += 148;
+                Width = 95, Value = DateTime.Today.AddDays(-30) };
+            AddPair("From", _dtpFrom, 108);
 
-            // Date to
-            pnlFilters.Controls.Add(MakeFilterLabel("To:", x, 10));
+            // To date
             _dtpTo = new DateTimePicker { Format = DateTimePickerFormat.Short,
-                Location = new Point(x + 24, 8), Width = 100,
-                Value = DateTime.Today };
-            pnlFilters.Controls.Add(_dtpTo); x += 134;
+                Width = 95, Value = DateTime.Today };
+            AddPair("To", _dtpTo, 108);
 
-            // Region
-            pnlFilters.Controls.Add(MakeFilterLabel("Region:", x, 10));
-            _cmbRegion = MakeFilterCombo(x + 52, 110);
+            // Region combo
+            _cmbRegion = MakeFilterCombo(0, 100);
             _cmbRegion.Items.Add("All Regions");
             foreach (var r in new[] { "NZ", "AU", "US", "EU", "APAC" })
                 _cmbRegion.Items.Add(r);
             _cmbRegion.SelectedIndex = 0;
-            pnlFilters.Controls.Add(_cmbRegion); x += 172;
+            AddPair("Region", _cmbRegion, 114);
 
-            // Item type
-            pnlFilters.Controls.Add(MakeFilterLabel("Type:", x, 10));
-            _cmbItemType = MakeFilterCombo(x + 42, 120);
+            // Item type combo
+            _cmbItemType = MakeFilterCombo(0, 110);
             _cmbItemType.Items.Add("All Types");
             foreach (ItemType t in Enum.GetValues<ItemType>())
                 _cmbItemType.Items.Add(t);
             _cmbItemType.SelectedIndex = 0;
-            pnlFilters.Controls.Add(_cmbItemType); x += 172;
+            AddPair("Type", _cmbItemType, 124);
 
-            // Character class
-            pnlFilters.Controls.Add(MakeFilterLabel("Class:", x, 10));
-            _cmbCharClass = MakeFilterCombo(x + 44, 110);
+            // Character class combo
+            _cmbCharClass = MakeFilterCombo(0, 105);
             _cmbCharClass.Items.Add("All Classes");
             foreach (CharacterClass c in Enum.GetValues<CharacterClass>())
                 _cmbCharClass.Items.Add(c);
             _cmbCharClass.SelectedIndex = 0;
-            pnlFilters.Controls.Add(_cmbCharClass); x += 164;
+            AddPair("Class", _cmbCharClass, 118);
 
-            // Granularity
-            pnlFilters.Controls.Add(MakeFilterLabel("Group:", x, 10));
-            _cmbGran = MakeFilterCombo(x + 46, 90);
+            // Granularity combo
+            _cmbGran = MakeFilterCombo(0, 88);
             _cmbGran.Items.AddRange(new object[] { "daily", "weekly", "monthly" });
             _cmbGran.SelectedIndex = 0;
-            pnlFilters.Controls.Add(_cmbGran); x += 146;
+            AddPair("Group", _cmbGran, 102);
 
-            // Refresh button
+            // Apply button — always placed after the last combo
             _btnRefresh = new Button
             {
                 Text      = "↻  Apply",
@@ -299,8 +307,8 @@ namespace GGG_MAS.Forms
                 BackColor = ColAccent,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Size      = new Size(80, 30),
-                Location  = new Point(x, 6),
+                Size      = new Size(78, 30),
+                Location  = new Point(x, 16),
                 Cursor    = Cursors.Hand
             };
             _btnRefresh.FlatAppearance.BorderSize = 0;
@@ -315,35 +323,37 @@ namespace GGG_MAS.Forms
         // ── Sales Overview view ───────────────────────────────
         private void BuildViewSales()
         {
-            _viewSales = new Panel { Dock = DockStyle.Fill, BackColor = ColBg };
+            _viewSales = new Panel { Dock = DockStyle.Fill, BackColor = ColBg,
+                                     Padding = new Padding(12, 8, 12, 8) };
 
-            // KPI stat cards row
-            var pnlStats = new Panel { Dock = DockStyle.Top, Height = 100 };
-            pnlStats.BackColor = Color.Transparent;
+            // KPI stat cards row — spaced so all four are visible
+            var pnlStats = new Panel { Dock = DockStyle.Top, Height = 104,
+                                       BackColor = Color.Transparent };
 
-            _lblRevenue   = MakeStatCard("Total Revenue",    "$0.00",     0);
-            _lblTxCount   = MakeStatCard("Transactions",     "0",         210);
-            _lblBundlePct = MakeStatCard("Bundle %",         "0%",        420);
-            _lblTopItem   = MakeStatCard("Top Item",         "—",         630);
+            _lblRevenue   = MakeStatCard("Total Revenue",  "$0.00", 0);
+            _lblTxCount   = MakeStatCard("Transactions",   "0",     210);
+            _lblBundlePct = MakeStatCard("Bundle %",       "0%",    420);
+            _lblTopItem   = MakeStatCard("Top Item",       "—",     630);
 
             pnlStats.Controls.AddRange(new Control[]
                 { _lblRevenue, _lblTxCount, _lblBundlePct, _lblTopItem });
             _viewSales.Controls.Add(pnlStats);
 
-            // Two grids side by side: Top by Category | Top by Class
-            var pnlGrids = new Panel { Dock = DockStyle.Fill };
-            pnlGrids.BackColor = Color.Transparent;
+            // Two grids side by side
+            var pnlGrids = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
 
-            var lblCat   = MakeGridTitle("🏆  Top Sellers by Category (BR-01)");
-            lblCat.Location  = new Point(0, 8);
-            _dgvTopCategory  = MakeDataGrid();
-            _dgvTopCategory.Location = new Point(0, 34);
+            var lblCat  = MakeGridTitle("🏆  Top Sellers by Category (BR-01)");
+            lblCat.Location = new Point(0, 6);
+            _dgvTopCategory = MakeDataGrid();
+            _dgvTopCategory.Location = new Point(0, 30);
+            _dgvTopCategory.Size     = new Size(460, 420);
             _dgvTopCategory.Anchor   = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
 
-            var lblCls   = MakeGridTitle("🎮  Top Sellers by Character Class (BR-02)");
-            lblCls.Location  = new Point(480, 8);
-            _dgvTopClass     = MakeDataGrid();
-            _dgvTopClass.Location = new Point(480, 34);
+            var lblCls  = MakeGridTitle("🎮  Top Sellers by Character Class (BR-02)");
+            lblCls.Location = new Point(476, 6);
+            _dgvTopClass = MakeDataGrid();
+            _dgvTopClass.Location = new Point(476, 30);
+            _dgvTopClass.Size     = new Size(460, 420);
             _dgvTopClass.Anchor   = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
 
             pnlGrids.Controls.AddRange(new Control[]
@@ -354,14 +364,16 @@ namespace GGG_MAS.Forms
         // ── Demographics view ─────────────────────────────────
         private void BuildViewDemographic()
         {
-            _viewDemographic = new Panel { Dock = DockStyle.Fill, BackColor = ColBg };
+            _viewDemographic = new Panel { Dock = DockStyle.Fill, BackColor = ColBg,
+                                           Padding = new Padding(12, 8, 12, 8) };
 
             var lbl = MakeGridTitle("🌍  Revenue by Region & Spending Tier (BR-06, FR07)");
-            lbl.Location = new Point(0, 10);
+            lbl.Location = new Point(12, 10);
             _dgvDemographic = MakeDataGrid();
-            _dgvDemographic.Location = new Point(0, 40);
+            _dgvDemographic.Location = new Point(12, 36);
             _dgvDemographic.Anchor   = AnchorStyles.Top | AnchorStyles.Left |
                                        AnchorStyles.Bottom | AnchorStyles.Right;
+            _dgvDemographic.Size     = new Size(900, 500);
             _viewDemographic.Controls.Add(lbl);
             _viewDemographic.Controls.Add(_dgvDemographic);
         }
@@ -369,12 +381,14 @@ namespace GGG_MAS.Forms
         // ── Revenue Trends view ───────────────────────────────
         private void BuildViewTrends()
         {
-            _viewTrends = new Panel { Dock = DockStyle.Fill, BackColor = ColBg };
+            _viewTrends = new Panel { Dock = DockStyle.Fill, BackColor = ColBg,
+                                      Padding = new Padding(12, 8, 12, 8) };
 
             var lbl = MakeGridTitle("📈  Revenue Trends — Daily / Weekly / Monthly (FR10)");
-            lbl.Location = new Point(0, 10);
+            lbl.Location = new Point(12, 10);
             _dgvTrends   = MakeDataGrid();
-            _dgvTrends.Location = new Point(0, 40);
+            _dgvTrends.Location = new Point(12, 36);
+            _dgvTrends.Size     = new Size(900, 500);
             _dgvTrends.Anchor   = AnchorStyles.Top | AnchorStyles.Left |
                                   AnchorStyles.Bottom | AnchorStyles.Right;
             _viewTrends.Controls.Add(lbl);
@@ -384,12 +398,14 @@ namespace GGG_MAS.Forms
         // ── Underperforming view ──────────────────────────────
         private void BuildViewUnderperf()
         {
-            _viewUnderperf = new Panel { Dock = DockStyle.Fill, BackColor = ColBg };
+            _viewUnderperf = new Panel { Dock = DockStyle.Fill, BackColor = ColBg,
+                                         Padding = new Padding(12, 8, 12, 8) };
 
             var lbl = MakeGridTitle("⚠   Underperforming MTX Items (FR11, BR-04, BR-05)");
-            lbl.Location = new Point(0, 10);
+            lbl.Location = new Point(12, 10);
             _dgvUnderperf = MakeDataGrid();
-            _dgvUnderperf.Location = new Point(0, 40);
+            _dgvUnderperf.Location = new Point(12, 36);
+            _dgvUnderperf.Size     = new Size(900, 500);
             _dgvUnderperf.Anchor   = AnchorStyles.Top | AnchorStyles.Left |
                                      AnchorStyles.Bottom | AnchorStyles.Right;
             _viewUnderperf.Controls.Add(lbl);
@@ -495,9 +511,9 @@ namespace GGG_MAS.Forms
         // ── Populate: Revenue Trends ──────────────────────────
         private void PopulateTrendsView(Report r)
         {
+            // Only bind Period and Revenue — no extra properties become unwanted columns
             _dgvTrends.DataSource = r.RevenueTrend
-                .Select(kv => new { Period = kv.Key, Revenue = $"${kv.Value:N2}",
-                                    RawRevenue = kv.Value })
+                .Select(kv => new { Period = kv.Key, Revenue = $"${kv.Value:N2}" })
                 .OrderBy(x => x.Period)
                 .ToList();
             StyleGrid(_dgvTrends);
