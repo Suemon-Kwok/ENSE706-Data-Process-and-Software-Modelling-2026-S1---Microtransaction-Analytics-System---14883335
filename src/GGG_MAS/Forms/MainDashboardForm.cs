@@ -162,6 +162,23 @@ namespace GGG_MAS.Forms
             _btnExport.Click    += (_,__)=> OpenExport();
             _btnLogout.Click    += (_,__)=> Logout();
 
+            // Toggle arrow — sits at the very bottom of the sidebar.
+            // Shows ◄ (collapse) when sidebar is open.
+            _btnToggle = new Button
+            {
+                Text      = "◄  Hide Menu",
+                Font      = new Font("Segoe UI", 9, FontStyle.Bold),
+                BackColor = Color.FromArgb(50, 80, 120),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Size      = new Size(SW - 10, 36),
+                Location  = new Point(5, 510),
+                Cursor    = Cursors.Hand
+            };
+            _btnToggle.FlatAppearance.BorderSize = 0;
+            _btnToggle.Click += ToggleSidebar;
+            _pnlSidebar.Controls.Add(_btnToggle);
+
             Controls.Add(_pnlSidebar);
         }
 
@@ -184,24 +201,6 @@ namespace GGG_MAS.Forms
                 AutoSize=true, Location=new Point(880,18)
             };
             _pnlTopBar.Controls.Add(_lblUserInfo);
-
-            // Toggle button: collapses/expands the sidebar
-            // Anchored to the right edge of the top bar so it never overlaps content
-            _btnToggle = new Button
-            {
-                Text      = "◀",   // left arrow = sidebar is open
-                Font      = new Font("Segoe UI", 11, FontStyle.Bold),
-                BackColor = Color.FromArgb(50, 80, 120),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Size      = new Size(34, 34),
-                Location  = new Point(4, 9),  // left side of top-bar
-                Cursor    = Cursors.Hand,
-                Tag       = "toggle"
-            };
-            _btnToggle.FlatAppearance.BorderSize = 0;
-            _btnToggle.Click += ToggleSidebar;
-            _pnlTopBar.Controls.Add(_btnToggle);
 
             // Filter bar — 76px tall, two-row (label on top, control below)
             _pnlFilters = new Panel { Dock=DockStyle.Top, Height=76, BackColor=ColFilt };
@@ -578,16 +577,45 @@ namespace GGG_MAS.Forms
 
         // ═══════════════ SIDEBAR TOGGLE
 
-        // Slides the sidebar in or out and flips the arrow direction
+        // Expand button shown on the form when sidebar is collapsed.
+        // Stays pinned to left edge so user can always re-open the menu.
+        private Button? _btnExpand;
+
+        // Collapses or expands the sidebar.
         private void ToggleSidebar(object? sender, EventArgs e)
         {
             _sidebarVisible = !_sidebarVisible;
-
-            // Show or hide the sidebar panel
             _pnlSidebar.Visible = _sidebarVisible;
 
-            // Flip the arrow: ◀ when open (click to close), ▶ when closed (click to open)
-            _btnToggle.Text = _sidebarVisible ? "◀" : "▶";
+            if (!_sidebarVisible)
+            {
+                // Sidebar is now hidden — create a small expand button on the form edge
+                _btnExpand = new Button
+                {
+                    Text      = "►",   // right-pointing arrow = click to re-open
+                    Font      = new Font("Segoe UI", 11, FontStyle.Bold),
+                    BackColor = Color.FromArgb(30, 58, 95),
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    Size      = new Size(28, 60),
+                    Location  = new Point(0, 120),  // pinned to left edge of form
+                    Cursor    = Cursors.Hand
+                };
+                _btnExpand.FlatAppearance.BorderSize = 0;
+                _btnExpand.Click += ToggleSidebar;   // same toggle re-opens it
+                Controls.Add(_btnExpand);
+                _btnExpand.BringToFront();
+            }
+            else
+            {
+                // Sidebar is back — remove the floating expand button
+                if (_btnExpand != null)
+                {
+                    Controls.Remove(_btnExpand);
+                    _btnExpand.Dispose();
+                    _btnExpand = null;
+                }
+            }
         }
 
         // ═══════════════ NAVIGATION ══════════════════════════
