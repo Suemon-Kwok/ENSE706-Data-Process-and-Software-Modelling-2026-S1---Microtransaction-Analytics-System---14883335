@@ -185,7 +185,29 @@ namespace GGG_MAS.Forms
         // ── Main panel (right of sidebar) ────────────────────
         private void BuildMain()
         {
-            _pnlMain = new Panel { Dock=DockStyle.Fill, BackColor=ColBg };
+            // Give _pnlMain a fixed left margin = sidebar width.
+            // This guarantees content is ALWAYS to the right of the sidebar,
+            // no matter what draw order Windows uses.
+            _pnlMain = new Panel
+            {
+                BackColor = ColBg,
+                Location  = new Point(SW, 0),
+                Size      = new Size(ClientSize.Width - SW, ClientSize.Height)
+            };
+            // Keep _pnlMain filling the right area when the window is resized
+            Resize += (_,__) =>
+            {
+                int left = _pnlSidebar.Visible ? SW : 0;
+                _pnlMain.Location = new Point(left, 0);
+                _pnlMain.Size     = new Size(ClientSize.Width - left, ClientSize.Height);
+            };
+            // Also update layout when sidebar is toggled
+            _pnlSidebar.VisibleChanged += (_,__) =>
+            {
+                int left = _pnlSidebar.Visible ? SW : 0;
+                _pnlMain.Location = new Point(left, 0);
+                _pnlMain.Size     = new Size(ClientSize.Width - left, ClientSize.Height);
+            };
 
             // Top title bar
             _pnlTopBar = new Panel { Dock=DockStyle.Top, Height=52, BackColor=ColHeader };
@@ -193,12 +215,12 @@ namespace GGG_MAS.Forms
             {
                 Text="⚙  GGG Microtransaction Analytics System",
                 Font=new Font("Segoe UI",13,FontStyle.Bold),
-                ForeColor=ColAccent, AutoSize=true, Location=new Point(50,13)
+                ForeColor=ColAccent, AutoSize=true, Location=new Point(16,13)
             });
             _lblUserInfo = new Label
             {
                 Font=new Font("Segoe UI",9), ForeColor=ColMuted,
-                AutoSize=true, Location=new Point(950,18)
+                AutoSize=true, Location=new Point(1020,18)
             };
             _pnlTopBar.Controls.Add(_lblUserInfo);
 
@@ -229,7 +251,7 @@ namespace GGG_MAS.Forms
         private void BuildFilters()
         {
             // Column start positions
-            int[] xs   = { 50, 158, 270, 386, 512, 632 };
+            int[] xs   = { 16, 124, 236, 352, 478, 598 };
             int[] ws   = { 96,  96, 104, 114, 108,  86 };
             var labels = new[]{"From","To","Region","Type","Class","Group"};
 
@@ -277,7 +299,7 @@ namespace GGG_MAS.Forms
                 BackColor=ColAccent, ForeColor=Color.White,
                 FlatStyle=FlatStyle.Flat,
                 Size=new Size(96,42),          // large and prominent
-                Location=new Point(744,17),    // vertically centred
+                Location=new Point(708,17),    // vertically centred
                 Cursor=Cursors.Hand
             };
             _btnRefresh.FlatAppearance.BorderSize=0;
@@ -590,6 +612,8 @@ namespace GGG_MAS.Forms
         {
             _sidebarVisible = !_sidebarVisible;
             _pnlSidebar.Visible = _sidebarVisible;
+            // Force the main panel to reposition immediately after toggle
+            OnResize(EventArgs.Empty);
 
             if (!_sidebarVisible)
             {
