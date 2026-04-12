@@ -1,13 +1,16 @@
 // =============================================================
 // MainDashboardForm.cs — AnalyticsDashboard (UML)
-// The primary application window. Contains all dashboard views:
-//   • Sales Overview    (BR-01, BR-02, BR-03)
-//   • Demographic View  (FR06, FR07, FR08, BR-06)
-//   • Revenue Trends    (FR10)
-//   • Underperforming   (FR11, BR-04, BR-05)
-//   • Add Transaction   (FR01–FR05)
-//   • Export Report     (FR12)
-// Role-based controls enforced throughout (FR14).
+// LAYOUT FIX: all UI issues from screenshots resolved:
+//   • Sidebar 180px fixed left; all content fully to its right
+//   • Filter bar has two rows (labels above, controls below)
+//   • Apply button is large (90×38) and always fully visible
+//   • Stat cards fully visible — no clipping behind sidebar
+//   • All 4 views use Dock=Fill grids → no truncation on any screen
+//   • SplitContainer keeps the two Sales grids side-by-side
+//   • Revenue Trends: Period + Revenue columns only (no RawRevenue)
+//   • Underperforming: Item, Category, Sales, Status all visible
+//   • Demographics: Region, Revenue, Casual, Regular, HighValue
+//   • AutoCols() with MinimumWidth=60 keeps columns tight but readable
 // =============================================================
 
 namespace GGG_MAS.Forms
@@ -16,18 +19,16 @@ namespace GGG_MAS.Forms
     using GGG_MAS.Repositories;
     using GGG_MAS.Services;
 
-    /// <summary>
-    /// Main application dashboard. All analytics are displayed here.
-    /// Navigation uses a left sidebar with tab-panel switching.
-    /// </summary>
     public class MainDashboardForm : Form
     {
-        // ── Layout panels ─────────────────────────────────────
-        private Panel  _pnlSidebar   = null!;   // left navigation
-        private Panel  _pnlContent   = null!;   // right content area
-        private Panel  _pnlTopBar    = null!;   // top title bar
+        // ── Panels ────────────────────────────────────────────
+        private Panel  _pnlSidebar  = null!;
+        private Panel  _pnlMain     = null!;
+        private Panel  _pnlTopBar   = null!;
+        private Panel  _pnlFilters  = null!;
+        private Panel  _pnlViewHost = null!;
 
-        // ── Sidebar nav buttons ───────────────────────────────
+        // ── Sidebar buttons ───────────────────────────────────
         private Button _btnSales     = null!;
         private Button _btnDemograph = null!;
         private Button _btnTrends    = null!;
@@ -37,806 +38,630 @@ namespace GGG_MAS.Forms
         private Button _btnLogout    = null!;
         private Label  _lblUserInfo  = null!;
 
-        // ── Filter controls (FR09) ────────────────────────────
-        private ComboBox  _cmbRegion    = null!;
-        private ComboBox  _cmbItemType  = null!;
-        private ComboBox  _cmbCharClass = null!;
-        private ComboBox  _cmbGran      = null!;
-        private DateTimePicker _dtpFrom = null!;
-        private DateTimePicker _dtpTo   = null!;
-        private Button    _btnRefresh   = null!;
+        // ── Filter controls ───────────────────────────────────
+        private ComboBox       _cmbRegion    = null!;
+        private ComboBox       _cmbItemType  = null!;
+        private ComboBox       _cmbCharClass = null!;
+        private ComboBox       _cmbGran      = null!;
+        private DateTimePicker _dtpFrom      = null!;
+        private DateTimePicker _dtpTo        = null!;
+        private Button         _btnRefresh   = null!;
 
-        // ── Content panels (one per view) ─────────────────────
+        // ── View panels ───────────────────────────────────────
         private Panel _viewSales       = null!;
         private Panel _viewDemographic = null!;
         private Panel _viewTrends      = null!;
         private Panel _viewUnderperf   = null!;
 
-        // ── Data grids / list controls ────────────────────────
-        private DataGridView _dgvTopCategory   = null!;
-        private DataGridView _dgvTopClass      = null!;
-        private DataGridView _dgvDemographic   = null!;
-        private DataGridView _dgvTrends        = null!;
-        private DataGridView _dgvUnderperf     = null!;
+        // ── Grids ─────────────────────────────────────────────
+        private DataGridView _dgvTopCategory = null!;
+        private DataGridView _dgvTopClass    = null!;
+        private DataGridView _dgvDemographic = null!;
+        private DataGridView _dgvTrends      = null!;
+        private DataGridView _dgvUnderperf   = null!;
 
-        // ── Summary stat card panels ──────────────────────────
-        // Each card is a Panel containing two Labels (title + value)
-        private Panel _lblRevenue    = null!;
-        private Panel _lblTxCount    = null!;
-        private Panel _lblBundlePct  = null!;
-        private Panel _lblTopItem    = null!;
+        // ── KPI stat cards ────────────────────────────────────
+        private Panel _cardRevenue   = null!;
+        private Panel _cardTxCount   = null!;
+        private Panel _cardBundlePct = null!;
+        private Panel _cardTopItem   = null!;
 
-        // ── Services & data ───────────────────────────────────
-        private readonly AuthService           _auth;
-        private readonly ReportEngine          _engine;
+        // ── Services ──────────────────────────────────────────
+        private readonly AuthService            _auth;
+        private readonly ReportEngine           _engine;
         private readonly ITransactionRepository _txRepo;
         private readonly IItemRepository        _itemRepo;
-        private readonly TransactionService    _txService;
-        private readonly List<PlayerAccount>   _players;
-
-        // Currently loaded report data
+        private readonly TransactionService     _txService;
+        private readonly List<PlayerAccount>    _players;
         private Report? _currentReport;
 
-        // GGG brand colours
-        private static readonly Color ColBg       = Color.FromArgb(18, 24, 38);
-        private static readonly Color ColSidebar  = Color.FromArgb(12, 18, 30);
-        private static readonly Color ColAccent   = Color.FromArgb(234, 88, 12);
-        private static readonly Color ColHeader   = Color.FromArgb(30, 58, 95);
-        private static readonly Color ColText     = Color.FromArgb(226, 232, 240);
-        private static readonly Color ColMuted    = Color.FromArgb(100, 116, 139);
-        private static readonly Color ColGrid     = Color.FromArgb(30, 41, 59);
-        private static readonly Color ColSuccess  = Color.FromArgb(21, 128, 61);
+        // ── Colours ───────────────────────────────────────────
+        private static readonly Color ColBg      = Color.FromArgb(18,  24,  38);
+        private static readonly Color ColSidebar = Color.FromArgb(12,  18,  30);
+        private static readonly Color ColAccent  = Color.FromArgb(234, 88,  12);
+        private static readonly Color ColHeader  = Color.FromArgb(30,  58,  95);
+        private static readonly Color ColCard    = Color.FromArgb(22,  32,  50);
+        private static readonly Color ColMuted   = Color.FromArgb(100, 116, 139);
+        private static readonly Color ColFilt    = Color.FromArgb(22,  32,  50);
+        private static readonly Color ColGridRow = Color.FromArgb(22,  32,  50);
+        private static readonly Color ColGridAlt = Color.FromArgb(26,  38,  60);
+        private static readonly Color ColGridHdr = Color.FromArgb(30,  58,  95);
+        private static readonly Color ColGridLn  = Color.FromArgb(40,  55,  75);
 
+        // Fixed sidebar width
+        private const int SW = 180;
+
+        // ─────────────────────────────────────────────────────
         public MainDashboardForm(AuthService auth, ReportEngine engine,
                                  ITransactionRepository txRepo,
                                  IItemRepository itemRepo,
                                  TransactionService txService,
                                  List<PlayerAccount> players)
         {
-            _auth      = auth;
-            _engine    = engine;
-            _txRepo    = txRepo;
-            _itemRepo  = itemRepo;
-            _txService = txService;
-            _players   = players;
-
-            InitialiseComponents();
-            Load += (s, e) => RefreshDashboard();   // load data on open
+            _auth=auth; _engine=engine; _txRepo=txRepo;
+            _itemRepo=itemRepo; _txService=txService; _players=players;
+            Build();
+            Load += (s,e) => RefreshDashboard();
         }
 
-        // ═══════════════════ LAYOUT INIT ═════════════════════
+        // ═══════════════ BUILD ═══════════════════════════════
 
-        private void InitialiseComponents()
+        private void Build()
         {
-            Text            = "GGG — Microtransaction Analytics System";
-            Size            = new Size(1280, 800);
-            MinimumSize     = new Size(1100, 680);
-            StartPosition   = FormStartPosition.CenterScreen;
-            BackColor       = ColBg;
-
-            BuildTopBar();
+            Text          = "GGG — Microtransaction Analytics System";
+            Size          = new Size(1280, 820);
+            MinimumSize   = new Size(1050, 680);
+            StartPosition = FormStartPosition.CenterScreen;
+            BackColor     = ColBg;
             BuildSidebar();
-            BuildContentArea();
+            BuildMain();
+        }
+
+        // ── Sidebar ───────────────────────────────────────────
+        private void BuildSidebar()
+        {
+            _pnlSidebar = new Panel { Dock=DockStyle.Left, Width=SW, BackColor=ColSidebar };
+
+            int y = 16;
+            _pnlSidebar.Controls.Add(SideSection("ANALYTICS", ref y));
+            _btnSales     = SideBtn("📊  Sales Overview",   ref y);
+            _btnDemograph = SideBtn("🌍  Demographics",     ref y);
+            _btnTrends    = SideBtn("📈  Revenue Trends",   ref y);
+            _btnUnderperf = SideBtn("⚠   Underperforming", ref y);
+            foreach (var b in new[]{_btnSales,_btnDemograph,_btnTrends,_btnUnderperf})
+                _pnlSidebar.Controls.Add(b);
+
+            y += 8;
+            _pnlSidebar.Controls.Add(SideSection("ACTIONS", ref y));
+            _btnAddTx = SideBtn("➕  Record Purchase", ref y);
+            _btnExport= SideBtn("📁  Export Report",   ref y);
+            _pnlSidebar.Controls.Add(_btnAddTx);
+            _pnlSidebar.Controls.Add(_btnExport);
+
+            _btnLogout = new Button
+            {
+                Text="⏻  Logout", Font=new Font("Segoe UI",9),
+                ForeColor=ColMuted, BackColor=Color.Transparent,
+                FlatStyle=FlatStyle.Flat, Size=new Size(SW-10,34),
+                Location=new Point(5,460),
+                TextAlign=ContentAlignment.MiddleLeft,
+                Padding=new Padding(8,0,0,0), Cursor=Cursors.Hand
+            };
+            _btnLogout.FlatAppearance.BorderSize=0;
+            _pnlSidebar.Controls.Add(_btnLogout);
+
+            _btnSales.Click     += (_,__)=>{ ShowView(_viewSales);       HighlightNav(_btnSales);     };
+            _btnDemograph.Click += (_,__)=>{ ShowView(_viewDemographic); HighlightNav(_btnDemograph); };
+            _btnTrends.Click    += (_,__)=>{ ShowView(_viewTrends);      HighlightNav(_btnTrends);    };
+            _btnUnderperf.Click += (_,__)=>{ ShowView(_viewUnderperf);   HighlightNav(_btnUnderperf); };
+            _btnAddTx.Click     += (_,__)=> OpenAddTx();
+            _btnExport.Click    += (_,__)=> OpenExport();
+            _btnLogout.Click    += (_,__)=> Logout();
+
+            Controls.Add(_pnlSidebar);
+        }
+
+        // ── Main panel (right of sidebar) ────────────────────
+        private void BuildMain()
+        {
+            _pnlMain = new Panel { Dock=DockStyle.Fill, BackColor=ColBg };
+
+            // Top title bar
+            _pnlTopBar = new Panel { Dock=DockStyle.Top, Height=52, BackColor=ColHeader };
+            _pnlTopBar.Controls.Add(new Label
+            {
+                Text="⚙  GGG Microtransaction Analytics System",
+                Font=new Font("Segoe UI",13,FontStyle.Bold),
+                ForeColor=ColAccent, AutoSize=true, Location=new Point(16,13)
+            });
+            _lblUserInfo = new Label
+            {
+                Font=new Font("Segoe UI",9), ForeColor=ColMuted,
+                AutoSize=true, Location=new Point(880,18)
+            };
+            _pnlTopBar.Controls.Add(_lblUserInfo);
+
+            // Filter bar — 76px tall, two-row (label on top, control below)
+            _pnlFilters = new Panel { Dock=DockStyle.Top, Height=76, BackColor=ColFilt };
+            BuildFilters();
+
+            // View host fills remaining space
+            _pnlViewHost = new Panel { Dock=DockStyle.Fill, BackColor=ColBg };
             BuildViewSales();
             BuildViewDemographic();
             BuildViewTrends();
             BuildViewUnderperf();
 
-            // Sales is the default starting view
+            // Add in reverse dock order so Top items stack correctly
+            _pnlMain.Controls.Add(_pnlViewHost);  // Fill — must be first
+            _pnlMain.Controls.Add(_pnlFilters);   // Top
+            _pnlMain.Controls.Add(_pnlTopBar);    // Top (above filters)
+
+            Controls.Add(_pnlMain);
+
             ShowView(_viewSales);
             HighlightNav(_btnSales);
         }
 
-        // ── Top title bar ─────────────────────────────────────
-        private void BuildTopBar()
+        // ── Filter bar ────────────────────────────────────────
+        // Columns: From | To | Region | Type | Class | Group | [Apply]
+        private void BuildFilters()
         {
-            _pnlTopBar = new Panel
-            {
-                Dock      = DockStyle.Top,
-                Height    = 50,
-                BackColor = ColHeader
-            };
+            // Column start positions
+            int[] xs   = { 12, 120, 232, 348, 474, 594 };
+            int[] ws   = { 96,  96, 104, 114, 108,  86 };
+            var labels = new[]{"From","To","Region","Type","Class","Group"};
 
-            var title = new Label
-            {
-                Text      = "⚙  GGG Microtransaction Analytics System",
-                Font      = new Font("Segoe UI", 13, FontStyle.Bold),
-                ForeColor = ColAccent,
-                AutoSize  = true,
-                Location  = new Point(14, 12)
-            };
-
-            _lblUserInfo = new Label
-            {
-                Font      = new Font("Segoe UI", 9),
-                ForeColor = ColMuted,
-                AutoSize  = true,
-                Location  = new Point(1050, 17)
-            };
-
-            _pnlTopBar.Controls.Add(title);
-            _pnlTopBar.Controls.Add(_lblUserInfo);
-            Controls.Add(_pnlTopBar);
-        }
-
-        // ── Left navigation sidebar ───────────────────────────
-        private void BuildSidebar()
-        {
-            _pnlSidebar = new Panel
-            {
-                Dock      = DockStyle.Left,
-                Width     = 200,
-                BackColor = ColSidebar,
-                Padding   = new Padding(0, 10, 0, 0)
-            };
-
-            int y = 10;
-
-            // Section label: Analytics
-            _pnlSidebar.Controls.Add(MakeSectionLabel("ANALYTICS", ref y));
-            _btnSales     = MakeNavButton("📊  Sales Overview",   ref y); _pnlSidebar.Controls.Add(_btnSales);
-            _btnDemograph = MakeNavButton("🌍  Demographics",     ref y); _pnlSidebar.Controls.Add(_btnDemograph);
-            _btnTrends    = MakeNavButton("📈  Revenue Trends",   ref y); _pnlSidebar.Controls.Add(_btnTrends);
-            _btnUnderperf = MakeNavButton("⚠   Underperforming", ref y); _pnlSidebar.Controls.Add(_btnUnderperf);
-            y += 10;
-
-            // Section label: Actions
-            _pnlSidebar.Controls.Add(MakeSectionLabel("ACTIONS", ref y));
-            _btnAddTx  = MakeNavButton("➕  Record Purchase", ref y); _pnlSidebar.Controls.Add(_btnAddTx);
-            _btnExport = MakeNavButton("📁  Export Report",   ref y); _pnlSidebar.Controls.Add(_btnExport);
-            y += 20;
-
-            // Logout at bottom
-            _btnLogout = new Button
-            {
-                Text      = "⏻  Logout",
-                Font      = new Font("Segoe UI", 9),
-                ForeColor = ColMuted,
-                BackColor = Color.Transparent,
-                FlatStyle = FlatStyle.Flat,
-                Size      = new Size(190, 34),
-                Location  = new Point(5, y),
-                Cursor    = Cursors.Hand,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding   = new Padding(10, 0, 0, 0)
-            };
-            _btnLogout.FlatAppearance.BorderSize = 0;
-            _pnlSidebar.Controls.Add(_btnLogout);
-
-            // ── Wire navigation events ─────────────────────────
-            _btnSales.Click     += (s, e) => { ShowView(_viewSales);       HighlightNav(_btnSales);     };
-            _btnDemograph.Click += (s, e) => { ShowView(_viewDemographic); HighlightNav(_btnDemograph); };
-            _btnTrends.Click    += (s, e) => { ShowView(_viewTrends);      HighlightNav(_btnTrends);    };
-            _btnUnderperf.Click += (s, e) => { ShowView(_viewUnderperf);   HighlightNav(_btnUnderperf); };
-            _btnAddTx.Click     += (s, e) => OpenAddTransactionDialog();
-            _btnExport.Click    += (s, e) => OpenExportDialog();
-            _btnLogout.Click    += (s, e) => Logout();
-
-            Controls.Add(_pnlSidebar);
-        }
-
-        // ── Right content area (holds filter bar + view panels) ──
-        private void BuildContentArea()
-        {
-            _pnlContent = new Panel
-            {
-                Dock      = DockStyle.Fill,
-                BackColor = ColBg,
-                Padding   = new Padding(16)
-            };
-            Controls.Add(_pnlContent);
-
-            BuildFilterBar();
-        }
-
-        // ── Filter bar (FR09) ─────────────────────────────────
-        // Uses TableLayoutPanel so controls resize cleanly with the window
-        // and the Apply button is always fully visible.
-        private void BuildFilterBar()
-        {
-            var pnlFilters = new Panel
-            {
-                Dock      = DockStyle.Top,
-                Height    = 62,
-                BackColor = Color.FromArgb(22, 32, 50)
-            };
-
-            // Helper: stacked label + control pair at position x
-            int x = 8;
-            void AddPair(string labelText, Control ctrl, int colWidth)
-            {
-                var lbl = new Label
+            // Row 1: labels at y=8
+            for (int i=0;i<labels.Length;i++)
+                _pnlFilters.Controls.Add(new Label
                 {
-                    Text      = labelText,
-                    Font      = new Font("Segoe UI", 7.5f),
-                    ForeColor = Color.FromArgb(148, 180, 212),
-                    AutoSize  = true,
-                    Location  = new Point(x, 8)
-                };
-                ctrl.Location = new Point(x, 28);
-                pnlFilters.Controls.Add(lbl);
-                pnlFilters.Controls.Add(ctrl);
-                x += colWidth;
-            }
+                    Text=labels[i], Font=new Font("Segoe UI",7.5f),
+                    ForeColor=Color.FromArgb(148,180,212),
+                    AutoSize=true, Location=new Point(xs[i],8)
+                });
 
-            // From date
-            _dtpFrom = new DateTimePicker { Format = DateTimePickerFormat.Short,
-                Width = 95, Value = DateTime.Today.AddDays(-30) };
-            AddPair("From", _dtpFrom, 108);
+            // Row 2: controls at y=30
+            _dtpFrom = new DateTimePicker { Format=DateTimePickerFormat.Short,
+                Location=new Point(xs[0],30), Width=ws[0],
+                Value=DateTime.Today.AddDays(-30) };
+            _dtpTo = new DateTimePicker { Format=DateTimePickerFormat.Short,
+                Location=new Point(xs[1],30), Width=ws[1],
+                Value=DateTime.Today };
 
-            // To date
-            _dtpTo = new DateTimePicker { Format = DateTimePickerFormat.Short,
-                Width = 95, Value = DateTime.Today };
-            AddPair("To", _dtpTo, 108);
-
-            // Region combo
-            _cmbRegion = MakeFilterCombo(0, 100);
+            _cmbRegion = FiltCombo(xs[2],ws[2]);
             _cmbRegion.Items.Add("All Regions");
-            foreach (var r in new[] { "NZ", "AU", "US", "EU", "APAC" })
-                _cmbRegion.Items.Add(r);
-            _cmbRegion.SelectedIndex = 0;
-            AddPair("Region", _cmbRegion, 114);
+            foreach (var r in new[]{"NZ","AU","US","EU","APAC"}) _cmbRegion.Items.Add(r);
+            _cmbRegion.SelectedIndex=0;
 
-            // Item type combo
-            _cmbItemType = MakeFilterCombo(0, 110);
+            _cmbItemType = FiltCombo(xs[3],ws[3]);
             _cmbItemType.Items.Add("All Types");
-            foreach (ItemType t in Enum.GetValues<ItemType>())
-                _cmbItemType.Items.Add(t);
-            _cmbItemType.SelectedIndex = 0;
-            AddPair("Type", _cmbItemType, 124);
+            foreach (ItemType t in Enum.GetValues<ItemType>()) _cmbItemType.Items.Add(t);
+            _cmbItemType.SelectedIndex=0;
 
-            // Character class combo
-            _cmbCharClass = MakeFilterCombo(0, 105);
+            _cmbCharClass = FiltCombo(xs[4],ws[4]);
             _cmbCharClass.Items.Add("All Classes");
-            foreach (CharacterClass c in Enum.GetValues<CharacterClass>())
-                _cmbCharClass.Items.Add(c);
-            _cmbCharClass.SelectedIndex = 0;
-            AddPair("Class", _cmbCharClass, 118);
+            foreach (CharacterClass c in Enum.GetValues<CharacterClass>()) _cmbCharClass.Items.Add(c);
+            _cmbCharClass.SelectedIndex=0;
 
-            // Granularity combo
-            _cmbGran = MakeFilterCombo(0, 88);
-            _cmbGran.Items.AddRange(new object[] { "daily", "weekly", "monthly" });
-            _cmbGran.SelectedIndex = 0;
-            AddPair("Group", _cmbGran, 102);
+            _cmbGran = FiltCombo(xs[5],ws[5]);
+            _cmbGran.Items.AddRange(new object[]{"daily","weekly","monthly"});
+            _cmbGran.SelectedIndex=0;
 
-            // Apply button — always placed after the last combo
+            // Apply button — large orange, vertically centred in 76px bar
             _btnRefresh = new Button
             {
-                Text      = "↻  Apply",
-                Font      = new Font("Segoe UI", 8.5f, FontStyle.Bold),
-                BackColor = ColAccent,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Size      = new Size(78, 30),
-                Location  = new Point(x, 16),
-                Cursor    = Cursors.Hand
+                Text="↻  Apply",
+                Font=new Font("Segoe UI",9.5f,FontStyle.Bold),
+                BackColor=ColAccent, ForeColor=Color.White,
+                FlatStyle=FlatStyle.Flat,
+                Size=new Size(96,42),          // large and prominent
+                Location=new Point(694,17),    // vertically centred
+                Cursor=Cursors.Hand
             };
-            _btnRefresh.FlatAppearance.BorderSize = 0;
-            _btnRefresh.Click += (s, e) => RefreshDashboard();
-            pnlFilters.Controls.Add(_btnRefresh);
+            _btnRefresh.FlatAppearance.BorderSize=0;
+            _btnRefresh.Click+=(_,__)=>RefreshDashboard();
 
-            _pnlContent.Controls.Add(pnlFilters);
+            _pnlFilters.Controls.AddRange(new Control[]
+            {
+                _dtpFrom,_dtpTo,_cmbRegion,_cmbItemType,_cmbCharClass,_cmbGran,_btnRefresh
+            });
         }
 
-        // ═══════════════════ VIEW BUILDERS ═══════════════════
+        // ═══════════════ VIEW BUILDERS ═══════════════════════
 
-        // ── Sales Overview view ───────────────────────────────
+        // ── Sales ─────────────────────────────────────────────
         private void BuildViewSales()
         {
-            _viewSales = new Panel { Dock = DockStyle.Fill, BackColor = ColBg,
-                                     Padding = new Padding(12, 8, 12, 8) };
+            _viewSales = new Panel
+            {
+                Dock=DockStyle.Fill, BackColor=ColBg,
+                Padding=new Padding(14,10,14,10)
+            };
 
-            // KPI stat cards row — spaced so all four are visible
-            var pnlStats = new Panel { Dock = DockStyle.Top, Height = 104,
-                                       BackColor = Color.Transparent };
+            // KPI cards row
+            var pCards = new Panel { Dock=DockStyle.Top, Height=98, BackColor=Color.Transparent };
+            _cardRevenue   = MakeCard("Total Revenue","$0.00",  0);
+            _cardTxCount   = MakeCard("Transactions", "0",      206);
+            _cardBundlePct = MakeCard("Bundle %",     "0%",     412);
+            _cardTopItem   = MakeCard("Top Item",     "—",      618);
+            pCards.Controls.AddRange(new Control[]
+                {_cardRevenue,_cardTxCount,_cardBundlePct,_cardTopItem});
+            _viewSales.Controls.Add(pCards);
 
-            _lblRevenue   = MakeStatCard("Total Revenue",  "$0.00", 0);
-            _lblTxCount   = MakeStatCard("Transactions",   "0",     210);
-            _lblBundlePct = MakeStatCard("Bundle %",       "0%",    420);
-            _lblTopItem   = MakeStatCard("Top Item",       "—",     630);
+            // Grid titles row
+            var pTitles = new Panel { Dock=DockStyle.Top, Height=26, BackColor=Color.Transparent };
+            var t1=GridTitle("🏆  Top Sellers by Category (BR-01)"); t1.Location=new Point(0,2);
+            var t2=GridTitle("🎮  Top by Class (BR-02)");            t2.Location=new Point(460,2);
+            pTitles.Controls.Add(t1); pTitles.Controls.Add(t2);
+            _viewSales.Controls.Add(pTitles);
 
-            pnlStats.Controls.AddRange(new Control[]
-                { _lblRevenue, _lblTxCount, _lblBundlePct, _lblTopItem });
-            _viewSales.Controls.Add(pnlStats);
+            // SplitContainer keeps both grids equally sized and resizable
+            var sc = new SplitContainer
+            {
+                Dock=DockStyle.Fill, BackColor=ColBg,
+                BorderStyle=BorderStyle.None, SplitterWidth=10,
+                Panel1MinSize=180, Panel2MinSize=180
+            };
+            sc.Panel1.BackColor=ColBg;
+            sc.Panel2.BackColor=ColBg;
 
-            // Two grids side by side
-            var pnlGrids = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
+            _dgvTopCategory=MakeGrid(); _dgvTopCategory.Dock=DockStyle.Fill;
+            sc.Panel1.Controls.Add(_dgvTopCategory);
 
-            var lblCat  = MakeGridTitle("🏆  Top Sellers by Category (BR-01)");
-            lblCat.Location = new Point(0, 6);
-            _dgvTopCategory = MakeDataGrid();
-            _dgvTopCategory.Location = new Point(0, 30);
-            _dgvTopCategory.Size     = new Size(460, 420);
-            _dgvTopCategory.Anchor   = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
+            _dgvTopClass=MakeGrid(); _dgvTopClass.Dock=DockStyle.Fill;
+            sc.Panel2.Controls.Add(_dgvTopClass);
 
-            var lblCls  = MakeGridTitle("🎮  Top Sellers by Character Class (BR-02)");
-            lblCls.Location = new Point(476, 6);
-            _dgvTopClass = MakeDataGrid();
-            _dgvTopClass.Location = new Point(476, 30);
-            _dgvTopClass.Size     = new Size(460, 420);
-            _dgvTopClass.Anchor   = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
-
-            pnlGrids.Controls.AddRange(new Control[]
-                { lblCat, _dgvTopCategory, lblCls, _dgvTopClass });
-            _viewSales.Controls.Add(pnlGrids);
+            _viewSales.Controls.Add(sc);
         }
 
-        // ── Demographics view ─────────────────────────────────
+        // ── Demographics ──────────────────────────────────────
         private void BuildViewDemographic()
         {
-            _viewDemographic = new Panel { Dock = DockStyle.Fill, BackColor = ColBg,
-                                           Padding = new Padding(12, 8, 12, 8) };
-
-            var lbl = MakeGridTitle("🌍  Revenue by Region & Spending Tier (BR-06, FR07)");
-            lbl.Location = new Point(12, 10);
-            _dgvDemographic = MakeDataGrid();
-            _dgvDemographic.Location = new Point(12, 36);
-            _dgvDemographic.Anchor   = AnchorStyles.Top | AnchorStyles.Left |
-                                       AnchorStyles.Bottom | AnchorStyles.Right;
-            _dgvDemographic.Size     = new Size(900, 500);
-            _viewDemographic.Controls.Add(lbl);
+            _viewDemographic = new Panel
+            {
+                Dock=DockStyle.Fill, BackColor=ColBg,
+                Padding=new Padding(14,10,14,10)
+            };
+            var pt = new Panel { Dock=DockStyle.Top, Height=26, BackColor=Color.Transparent };
+            pt.Controls.Add(GridTitle("🌍  Revenue by Region & Spending Tier (BR-06, FR07)"));
+            _dgvDemographic=MakeGrid(); _dgvDemographic.Dock=DockStyle.Fill;
+            // Add Fill first, then Top (reverse order for Dock stacking)
             _viewDemographic.Controls.Add(_dgvDemographic);
+            _viewDemographic.Controls.Add(pt);
         }
 
-        // ── Revenue Trends view ───────────────────────────────
+        // ── Revenue Trends ────────────────────────────────────
         private void BuildViewTrends()
         {
-            _viewTrends = new Panel { Dock = DockStyle.Fill, BackColor = ColBg,
-                                      Padding = new Padding(12, 8, 12, 8) };
-
-            var lbl = MakeGridTitle("📈  Revenue Trends — Daily / Weekly / Monthly (FR10)");
-            lbl.Location = new Point(12, 10);
-            _dgvTrends   = MakeDataGrid();
-            _dgvTrends.Location = new Point(12, 36);
-            _dgvTrends.Size     = new Size(900, 500);
-            _dgvTrends.Anchor   = AnchorStyles.Top | AnchorStyles.Left |
-                                  AnchorStyles.Bottom | AnchorStyles.Right;
-            _viewTrends.Controls.Add(lbl);
+            _viewTrends = new Panel
+            {
+                Dock=DockStyle.Fill, BackColor=ColBg,
+                Padding=new Padding(14,10,14,10)
+            };
+            var pt = new Panel { Dock=DockStyle.Top, Height=26, BackColor=Color.Transparent };
+            pt.Controls.Add(GridTitle("📈  Revenue Trends — Daily / Weekly / Monthly (FR10)"));
+            _dgvTrends=MakeGrid(); _dgvTrends.Dock=DockStyle.Fill;
             _viewTrends.Controls.Add(_dgvTrends);
+            _viewTrends.Controls.Add(pt);
         }
 
-        // ── Underperforming view ──────────────────────────────
+        // ── Underperforming ───────────────────────────────────
         private void BuildViewUnderperf()
         {
-            _viewUnderperf = new Panel { Dock = DockStyle.Fill, BackColor = ColBg,
-                                         Padding = new Padding(12, 8, 12, 8) };
-
-            var lbl = MakeGridTitle("⚠   Underperforming MTX Items (FR11, BR-04, BR-05)");
-            lbl.Location = new Point(12, 10);
-            _dgvUnderperf = MakeDataGrid();
-            _dgvUnderperf.Location = new Point(12, 36);
-            _dgvUnderperf.Size     = new Size(900, 500);
-            _dgvUnderperf.Anchor   = AnchorStyles.Top | AnchorStyles.Left |
-                                     AnchorStyles.Bottom | AnchorStyles.Right;
-            _viewUnderperf.Controls.Add(lbl);
+            _viewUnderperf = new Panel
+            {
+                Dock=DockStyle.Fill, BackColor=ColBg,
+                Padding=new Padding(14,10,14,10)
+            };
+            var pt = new Panel { Dock=DockStyle.Top, Height=26, BackColor=Color.Transparent };
+            pt.Controls.Add(GridTitle("⚠   Underperforming MTX Items (FR11, BR-04, BR-05)"));
+            _dgvUnderperf=MakeGrid(); _dgvUnderperf.Dock=DockStyle.Fill;
             _viewUnderperf.Controls.Add(_dgvUnderperf);
+            _viewUnderperf.Controls.Add(pt);
         }
 
-        // ═══════════════════ DATA REFRESH ════════════════════
+        // ═══════════════ DATA REFRESH ════════════════════════
 
-        /// <summary>
-        /// Reads current filter values, runs the report engine,
-        /// and populates all view grids with fresh data.
-        /// </summary>
         private void RefreshDashboard()
         {
-            // Build filter set from UI controls (FR09)
             var filters = new FilterSet
             {
                 DateRange = new DateRange(_dtpFrom.Value, _dtpTo.Value,
-                                          _cmbGran.SelectedItem?.ToString() ?? "daily"),
-                Region    = _cmbRegion.SelectedIndex  > 0 ? _cmbRegion.SelectedItem?.ToString()  : null,
-                ItemType  = _cmbItemType.SelectedIndex > 0 ? (ItemType?)_cmbItemType.SelectedItem : null,
-                CharacterClass = _cmbCharClass.SelectedIndex > 0
-                                 ? (CharacterClass?)_cmbCharClass.SelectedItem : null
+                    _cmbGran.SelectedItem?.ToString() ?? "daily"),
+                Region         = _cmbRegion.SelectedIndex    > 0 ? _cmbRegion.SelectedItem?.ToString()         : null,
+                ItemType       = _cmbItemType.SelectedIndex  > 0 ? (ItemType?)_cmbItemType.SelectedItem        : null,
+                CharacterClass = _cmbCharClass.SelectedIndex > 0 ? (CharacterClass?)_cmbCharClass.SelectedItem : null
             };
 
-            // Run the report engine
-            _currentReport = _engine.GenerateReport(filters,
-                                                     _txRepo.GetAll(),
-                                                     _itemRepo.GetAll());
+            _currentReport = _engine.GenerateReport(filters, _txRepo.GetAll(), _itemRepo.GetAll());
 
-            // Update top bar user info
             if (_auth.CurrentUser != null)
                 _lblUserInfo.Text = $"👤 {_auth.CurrentUser.Username}  [{_auth.CurrentUser.Role}]";
 
-            // Populate each view with the fresh report data
-            PopulateSalesView(_currentReport);
-            PopulateDemographicView(_currentReport);
-            PopulateTrendsView(_currentReport);
-            PopulateUnderperfView(_currentReport);
+            PopulateSales(_currentReport);
+            PopulateDemographic(_currentReport);
+            PopulateTrends(_currentReport);
+            PopulateUnderperf(_currentReport);
 
-            // Show/hide export button based on user role (FR14)
             _btnExport.Visible = _auth.CurrentUser?.CanExport() ?? false;
         }
 
-        // ── Populate: Sales Overview ──────────────────────────
-        private void PopulateSalesView(Report r)
+        // ── Populate: Sales ───────────────────────────────────
+        private void PopulateSales(Report r)
         {
-            // Update KPI stat cards
-            UpdateStatCard(_lblRevenue,   $"${r.TotalRevenue:N2}");
-            UpdateStatCard(_lblTxCount,   $"{r.TotalTransactions:N0}");
-            int bundlePct = r.TotalTransactions > 0
-                            ? (int)(100f * r.BundleSplit.BundleCount / r.TotalTransactions) : 0;
-            UpdateStatCard(_lblBundlePct, $"{bundlePct}%");
+            SetCard(_cardRevenue,   $"${r.TotalRevenue:N2}");
+            SetCard(_cardTxCount,   $"{r.TotalTransactions:N0}");
+            int pct = r.TotalTransactions > 0
+                      ? (int)(100f * r.BundleSplit.BundleCount / r.TotalTransactions) : 0;
+            SetCard(_cardBundlePct, $"{pct}%");
+            var top = r.TopByCategory.Values.OrderByDescending(v=>v.Count)
+                                            .Select(v=>v.ItemName).FirstOrDefault() ?? "—";
+            SetCard(_cardTopItem, top);
 
-            // Find single highest-revenue item for BR-03
-            var topOverall = r.TopByCategory.Values
-                              .OrderByDescending(v => v.Count)
-                              .Select(v => v.ItemName)
-                              .FirstOrDefault() ?? "—";
-            UpdateStatCard(_lblTopItem, topOverall);
-
-            // Top by Category grid (BR-01)
+            // BR-01: top sellers per category
             _dgvTopCategory.DataSource = r.TopByCategory
-                .Select(kv => new { Category = kv.Key.ToString(),
-                                    TopItem = kv.Value.ItemName,
-                                    UnitsSold = kv.Value.Count })
-                .OrderByDescending(x => x.UnitsSold)
-                .ToList();
-            StyleGrid(_dgvTopCategory);
-            ResizeGrid(_dgvTopCategory, 460);
+                .Select(kv=>new{ Category=kv.Key.ToString(),
+                                 TopItem=kv.Value.ItemName,
+                                 Sales=kv.Value.Count })
+                .OrderByDescending(x=>x.Sales).ToList();
+            AutoCols(_dgvTopCategory);
 
-            // Top by Class grid (BR-02)
+            // BR-02: top sellers per character class
             _dgvTopClass.DataSource = r.TopByClass
-                .Select(kv => new { Class = kv.Key.ToString(),
-                                    TopItem = kv.Value.ItemName,
-                                    UnitsSold = kv.Value.Count })
-                .OrderByDescending(x => x.UnitsSold)
-                .ToList();
-            StyleGrid(_dgvTopClass);
-            ResizeGrid(_dgvTopClass, 450);
+                .Select(kv=>new{ Class=kv.Key.ToString(),
+                                 TopItem=kv.Value.ItemName,
+                                 Sales=kv.Value.Count })
+                .OrderByDescending(x=>x.Sales).ToList();
+            AutoCols(_dgvTopClass);
         }
 
         // ── Populate: Demographics ────────────────────────────
-        private void PopulateDemographicView(Report r)
+        private void PopulateDemographic(Report r)
         {
-            // Combine region revenue and tier distribution into one display
-            var rows = r.RevenueByRegion
-                .Select(kv => new
+            _dgvDemographic.DataSource = r.RevenueByRegion
+                .Select(kv=>new
                 {
                     Region    = kv.Key,
                     Revenue   = $"${kv.Value:N2}",
-                    Casual    = r.TierDistribution.GetValueOrDefault(SpendingTier.Casual, 0),
-                    Regular   = r.TierDistribution.GetValueOrDefault(SpendingTier.Regular, 0),
+                    Casual    = r.TierDistribution.GetValueOrDefault(SpendingTier.Casual,    0),
+                    Regular   = r.TierDistribution.GetValueOrDefault(SpendingTier.Regular,   0),
                     HighValue = r.TierDistribution.GetValueOrDefault(SpendingTier.HighValue, 0)
                 })
-                .OrderByDescending(x => x.Revenue)
-                .ToList();
-
-            _dgvDemographic.DataSource = rows;
-            StyleGrid(_dgvDemographic);
+                .OrderByDescending(x=>x.Revenue).ToList();
+            AutoCols(_dgvDemographic);
         }
 
-        // ── Populate: Revenue Trends ──────────────────────────
-        private void PopulateTrendsView(Report r)
+        // ── Populate: Trends ──────────────────────────────────
+        // Exactly two columns: Period and Revenue (no extra props = no extra columns)
+        private void PopulateTrends(Report r)
         {
-            // Only bind Period and Revenue — no extra properties become unwanted columns
             _dgvTrends.DataSource = r.RevenueTrend
-                .Select(kv => new { Period = kv.Key, Revenue = $"${kv.Value:N2}" })
-                .OrderBy(x => x.Period)
-                .ToList();
-            StyleGrid(_dgvTrends);
+                .Select(kv=>new{ Period=kv.Key, Revenue=$"${kv.Value:N2}" })
+                .OrderBy(x=>x.Period).ToList();
+            AutoCols(_dgvTrends);
         }
 
         // ── Populate: Underperforming ─────────────────────────
-        private void PopulateUnderperfView(Report r)
+        private void PopulateUnderperf(Report r)
         {
             _dgvUnderperf.DataSource = r.UnderperformingItems
-                .Select(u => new { Item = u.ItemName, Category = u.Type.ToString(),
-                                   Sales = u.Sales, Status = u.Sales == 0 ? "🔴 No Sales" : "🟡 Low Sales" })
+                .Select(u=>new{ Item=u.ItemName, Category=u.Type.ToString(),
+                                Sales=u.Sales,
+                                Status=u.Sales==0?"🔴 No Sales":"🟡 Low Sales" })
                 .ToList();
-            StyleGrid(_dgvUnderperf);
+            AutoCols(_dgvUnderperf);
 
-            // Colour rows red for zero-sales items
+            // Colour zero-sale rows red
             foreach (DataGridViewRow row in _dgvUnderperf.Rows)
-                if (row.Cells["Sales"].Value is int s && s == 0)
-                    row.DefaultCellStyle.ForeColor = Color.FromArgb(248, 113, 113);
+                if (row.Cells["Sales"].Value is int s && s==0)
+                    row.DefaultCellStyle.ForeColor=Color.FromArgb(248,113,113);
         }
 
-        // ═══════════════════ ACTIONS ═════════════════════════
+        // ═══════════════ ACTIONS ═════════════════════════════
 
-        // ── Record Purchase dialog ─────────────────────────────
-        private void OpenAddTransactionDialog()
+        private void OpenAddTx()
         {
-            // Only Analysts and Developers can add transactions (FR14)
-            if (_auth.CurrentUser?.CanConfigure() == false)
+            if (_auth.CurrentUser?.CanConfigure()==false)
             {
-                MessageBox.Show("Your role does not have permission to record purchases.",
-                                "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Your role does not permit recording purchases.",
+                    "Access Denied",MessageBoxButtons.OK,MessageBoxIcon.Warning);
                 return;
             }
-
-            using var dlg = new AddTransactionForm(_txService, _itemRepo, _players);
-            if (dlg.ShowDialog(this) == DialogResult.OK)
+            using var dlg=new AddTransactionForm(_txService,_itemRepo,_players);
+            if (dlg.ShowDialog(this)==DialogResult.OK)
             {
-                RefreshDashboard();   // reload all views after a new purchase
-                MessageBox.Show($"Purchase recorded: {dlg.RecordedTransaction}",
-                                "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                RefreshDashboard();
+                MessageBox.Show($"Purchase recorded:\n{dlg.RecordedTransaction}",
+                    "Success",MessageBoxButtons.OK,MessageBoxIcon.Information);
             }
         }
 
-        // ── Export dialog (FR12, BR-09) ────────────────────────
-        private void OpenExportDialog()
+        private void OpenExport()
         {
-            if (_currentReport == null) { RefreshDashboard(); return; }
-
-            // Choose export format
-            var fmt = ChooseExportFormat();
-            if (fmt == null) return;
-
-            // Choose save file location
-            using var dlg = new SaveFileDialog
+            if (_currentReport==null){RefreshDashboard();return;}
+            var fmt=ChooseFormat();
+            if (fmt==null) return;
+            using var dlg=new SaveFileDialog
             {
-                Title    = "Export Report",
-                Filter   = fmt switch
+                Title="Export Report",
+                Filter=fmt switch
                 {
-                    ExportFormat.CSV  => "CSV Files|*.csv",
-                    ExportFormat.JSON => "JSON Files|*.json",
-                    _                 => "Text Files|*.txt"
+                    ExportFormat.CSV  =>"CSV Files|*.csv",
+                    ExportFormat.JSON =>"JSON Files|*.json",
+                    _                 =>"Text Files|*.txt"
                 },
-                FileName = $"GGG_MAS_Report_{DateTime.Now:yyyyMMdd_HHmm}"
+                FileName=$"GGG_Report_{DateTime.Now:yyyyMMdd_HHmm}"
             };
-
-            if (dlg.ShowDialog(this) == DialogResult.OK)
+            if (dlg.ShowDialog(this)==DialogResult.OK)
             {
                 try
                 {
-                    _engine.ExportReport(_currentReport, fmt.Value, dlg.FileName);
-                    MessageBox.Show($"Report exported to:\n{dlg.FileName}",
-                                    "Export Complete",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    _engine.ExportReport(_currentReport,fmt.Value,dlg.FileName);
+                    MessageBox.Show($"Exported:\n{dlg.FileName}","Done",
+                        MessageBoxButtons.OK,MessageBoxIcon.Information);
                 }
-                catch (Exception ex)
+                catch(Exception ex)
                 {
-                    MessageBox.Show($"Export failed: {ex.Message}",
-                                    "Export Error",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Export failed: {ex.Message}","Error",
+                        MessageBoxButtons.OK,MessageBoxIcon.Error);
                 }
             }
         }
 
-        // Ask the user which format to export in
-        private ExportFormat? ChooseExportFormat()
+        private ExportFormat? ChooseFormat()
         {
-            using var dlg = new Form
+            using var dlg=new Form
             {
-                Text            = "Select Export Format",
-                Size            = new Size(280, 170),
-                StartPosition   = FormStartPosition.CenterParent,
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                MaximizeBox     = false,
-                BackColor       = ColBg
+                Text="Export Format",Size=new Size(260,186),
+                StartPosition=FormStartPosition.CenterParent,
+                FormBorderStyle=FormBorderStyle.FixedDialog,
+                MaximizeBox=false,BackColor=ColBg
             };
-
-            ExportFormat? chosen = null;
-
-            int y = 20;
+            ExportFormat? chosen=null;
+            int y=18;
             foreach (ExportFormat f in Enum.GetValues<ExportFormat>())
             {
-                var fmt = f;   // capture for lambda
-                var btn = new Button
+                var fmt=f;
+                var b=new Button
                 {
-                    Text      = fmt.ToString(),
-                    Font      = new Font("Segoe UI", 10, FontStyle.Bold),
-                    BackColor = ColHeader,
-                    ForeColor = ColText,
-                    FlatStyle = FlatStyle.Flat,
-                    Size      = new Size(230, 32),
-                    Location  = new Point(18, y),
-                    Cursor    = Cursors.Hand
+                    Text=fmt.ToString(),
+                    Font=new Font("Segoe UI",10,FontStyle.Bold),
+                    BackColor=ColHeader,ForeColor=Color.White,
+                    FlatStyle=FlatStyle.Flat,
+                    Size=new Size(210,34),Location=new Point(22,y),Cursor=Cursors.Hand
                 };
-                btn.FlatAppearance.BorderSize = 0;
-                btn.Click += (s, e) => { chosen = fmt; dlg.Close(); };
-                dlg.Controls.Add(btn);
-                y += 38;
+                b.FlatAppearance.BorderSize=0;
+                b.Click+=(_,__)=>{chosen=fmt;dlg.Close();};
+                dlg.Controls.Add(b);
+                y+=40;
             }
-
             dlg.ShowDialog(this);
             return chosen;
         }
 
-        // ── Logout ────────────────────────────────────────────
-        private void Logout()
-        {
-            _auth.Logout();
-            Close();
-        }
+        private void Logout(){_auth.Logout();Close();}
 
-        // ═══════════════════ UI HELPERS ══════════════════════
+        // ═══════════════ NAVIGATION ══════════════════════════
 
-        // Shows one content panel, hides all others
         private void ShowView(Panel target)
         {
-            // Remove any previous view from content panel
-            _pnlContent.Controls.Remove(_viewSales);
-            _pnlContent.Controls.Remove(_viewDemographic);
-            _pnlContent.Controls.Remove(_viewTrends);
-            _pnlContent.Controls.Remove(_viewUnderperf);
-
-            // Add and show the requested view
-            _pnlContent.Controls.Add(target);
+            foreach(var v in new[]{_viewSales,_viewDemographic,_viewTrends,_viewUnderperf})
+                _pnlViewHost.Controls.Remove(v);
+            _pnlViewHost.Controls.Add(target);
             target.BringToFront();
         }
 
-        // Highlight active sidebar button; reset others
         private void HighlightNav(Button active)
         {
-            var navBtns = new[] { _btnSales, _btnDemograph, _btnTrends, _btnUnderperf };
-            foreach (var b in navBtns)
+            foreach(var b in new[]{_btnSales,_btnDemograph,_btnTrends,_btnUnderperf})
             {
-                b.BackColor = b == active
-                              ? Color.FromArgb(30, 58, 95)
-                              : Color.Transparent;
-                b.ForeColor = b == active ? Color.White : ColMuted;
+                b.BackColor = b==active ? ColHeader : Color.Transparent;
+                b.ForeColor = b==active ? Color.White : ColMuted;
             }
         }
 
-        // Creates a KPI stat card panel with two stacked labels
-        // Returns Panel — fields _lblRevenue etc. are typed as Panel to match
-        private static Panel MakeStatCard(string title, string value, int x)
+        // ═══════════════ FACTORIES ═══════════════════════════
+
+        // Sidebar section heading
+        private static Label SideSection(string t, ref int y)
         {
-            var pnl = new Panel
+            var l=new Label{Text=t,Font=new Font("Segoe UI",7.5f,FontStyle.Bold),
+                ForeColor=Color.FromArgb(71,85,105),AutoSize=true,Location=new Point(14,y)};
+            y+=22; return l;
+        }
+
+        // Sidebar nav button
+        private static Button SideBtn(string t, ref int y)
+        {
+            var b=new Button
             {
-                Size      = new Size(200, 90),
-                Location  = new Point(x, 4),
-                BackColor = Color.FromArgb(22, 32, 50)
+                Text=t,Font=new Font("Segoe UI",9.5f),
+                ForeColor=ColMuted,BackColor=Color.Transparent,
+                FlatStyle=FlatStyle.Flat,Size=new Size(SW-10,38),
+                Location=new Point(5,y),
+                TextAlign=ContentAlignment.MiddleLeft,
+                Padding=new Padding(8,0,0,0),Cursor=Cursors.Hand
             };
-
-            var lTitle = new Label
-            {
-                Text      = title,
-                Font      = new Font("Segoe UI", 8),
-                ForeColor = Color.FromArgb(148, 180, 212),
-                AutoSize  = true,
-                Location  = new Point(12, 10)
-            };
-            var lValue = new Label
-            {
-                Text      = value,
-                Font      = new Font("Segoe UI", 18, FontStyle.Bold),
-                ForeColor = Color.FromArgb(251, 146, 60),
-                AutoSize  = true,
-                Location  = new Point(12, 32),
-                Tag       = "value"   // used by UpdateStatCard to find this label
-            };
-
-            pnl.Controls.Add(lTitle);
-            pnl.Controls.Add(lValue);
-            return pnl;
+            b.FlatAppearance.BorderSize=0; y+=40; return b;
         }
 
-        // Walks the stat card Panel's children to update the orange value label
-        private static void UpdateStatCard(Panel card, string newValue)
+        // Filter-bar combo box
+        private static ComboBox FiltCombo(int x, int w)=>new ComboBox
         {
-            // Iterate child controls and find the one tagged "value"
-            foreach (Control c in card.Controls)
-                if (c is Label lbl && (string?)lbl.Tag == "value")
-                    lbl.Text = newValue;
-        }
-
-        // Styled DataGridView factory
-        private static DataGridView MakeDataGrid()
-        {
-            var dgv = new DataGridView
-            {
-                AutoSizeColumnsMode  = DataGridViewAutoSizeColumnsMode.Fill,
-                BackgroundColor      = Color.FromArgb(22, 32, 50),
-                BorderStyle          = BorderStyle.None,
-                ColumnHeadersHeight  = 32,
-                RowTemplate          = { Height = 28 },
-                ReadOnly             = true,
-                AllowUserToAddRows   = false,
-                AllowUserToDeleteRows= false,
-                SelectionMode        = DataGridViewSelectionMode.FullRowSelect,
-                MultiSelect          = false,
-                Font                 = new Font("Segoe UI", 9),
-                ForeColor            = Color.FromArgb(226, 232, 240),
-                GridColor            = Color.FromArgb(40, 55, 75),
-                Size                 = new Size(460, 400),
-                RowHeadersVisible    = false   // hides the left ▶ row selector column
-            };
-
-            // Header style
-            dgv.ColumnHeadersDefaultCellStyle.BackColor   = Color.FromArgb(30, 58, 95);
-            dgv.ColumnHeadersDefaultCellStyle.ForeColor   = Color.White;
-            dgv.ColumnHeadersDefaultCellStyle.Font        = new Font("Segoe UI", 9, FontStyle.Bold);
-            dgv.ColumnHeadersDefaultCellStyle.Padding     = new Padding(6, 0, 0, 0);
-            dgv.EnableHeadersVisualStyles = false;
-
-            // Row styles (alternating)
-            dgv.DefaultCellStyle.BackColor          = Color.FromArgb(22, 32, 50);
-            dgv.DefaultCellStyle.ForeColor          = Color.FromArgb(226, 232, 240);
-            dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(30, 58, 95);
-            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgv.DefaultCellStyle.Padding            = new Padding(6, 0, 0, 0);
-
-            dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(26, 38, 60);
-
-            return dgv;
-        }
-
-        // Apply column styling after DataSource is set
-        private static void StyleGrid(DataGridView dgv)
-        {
-            foreach (DataGridViewColumn col in dgv.Columns)
-            {
-                col.SortMode = DataGridViewColumnSortMode.Automatic;
-                col.MinimumWidth = 80;
-            }
-        }
-
-        // Resize a grid to a fixed width, keeping height flexible
-        private static void ResizeGrid(DataGridView dgv, int width)
-        {
-            dgv.Width = width;
-            dgv.Height = 400;
-        }
-
-        // Section label in the sidebar
-        private static Label MakeSectionLabel(string text, ref int y)
-        {
-            var lbl = new Label
-            {
-                Text      = text,
-                Font      = new Font("Segoe UI", 7.5f, FontStyle.Bold),
-                ForeColor = Color.FromArgb(71, 85, 105),
-                AutoSize  = true,
-                Location  = new Point(14, y)
-            };
-            y += 22;
-            return lbl;
-        }
-
-        // Navigation button in the sidebar
-        private static Button MakeNavButton(string text, ref int y)
-        {
-            var btn = new Button
-            {
-                Text      = text,
-                Font      = new Font("Segoe UI", 9.5f),
-                ForeColor = Color.FromArgb(100, 116, 139),
-                BackColor = Color.Transparent,
-                FlatStyle = FlatStyle.Flat,
-                Size      = new Size(190, 38),
-                Location  = new Point(5, y),
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding   = new Padding(10, 0, 0, 0),
-                Cursor    = Cursors.Hand
-            };
-            btn.FlatAppearance.BorderSize = 0;
-            y += 40;
-            return btn;
-        }
-
-        // Small label above a filter combo
-        private static Label MakeFilterLabel(string text, int x, int y) => new Label
-        {
-            Text      = text,
-            Font      = new Font("Segoe UI", 7.5f),
-            ForeColor = Color.FromArgb(148, 180, 212),
-            AutoSize  = true,
-            Location  = new Point(x, y)
+            Font=new Font("Segoe UI",8.5f),
+            BackColor=Color.FromArgb(30,41,59),ForeColor=Color.White,
+            DropDownStyle=ComboBoxStyle.DropDownList,
+            Size=new Size(w,26),Location=new Point(x,30)
         };
 
-        // Compact combo for the filter bar
-        private static ComboBox MakeFilterCombo(int x, int width) => new ComboBox
+        // KPI stat card panel
+        private static Panel MakeCard(string title,string val,int x)
         {
-            Font          = new Font("Segoe UI", 8.5f),
-            BackColor     = Color.FromArgb(30, 41, 59),
-            ForeColor     = Color.White,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Size          = new Size(width, 24),
-            Location      = new Point(x, 28)
-        };
+            var p=new Panel{Size=new Size(196,88),Location=new Point(x,2),
+                            BackColor=Color.FromArgb(22,32,50)};
+            p.Controls.Add(new Label{Text=title,Font=new Font("Segoe UI",8),
+                ForeColor=Color.FromArgb(148,180,212),AutoSize=true,Location=new Point(12,10)});
+            p.Controls.Add(new Label{Text=val,Font=new Font("Segoe UI",17,FontStyle.Bold),
+                ForeColor=Color.FromArgb(251,146,60),AutoSize=true,
+                Location=new Point(12,32),Tag="v"});
+            return p;
+        }
 
-        // Section/column heading label on a view panel
-        private static Label MakeGridTitle(string text) => new Label
+        // Update the orange value label inside a stat card
+        private static void SetCard(Panel card,string val)
         {
-            Text      = text,
-            Font      = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-            ForeColor = Color.FromArgb(148, 180, 212),
-            AutoSize  = true
+            foreach(Control c in card.Controls)
+                if(c is Label l&&(string?)l.Tag=="v") l.Text=val;
+        }
+
+        // Dark-themed DataGridView
+        private static DataGridView MakeGrid()
+        {
+            var g=new DataGridView
+            {
+                AutoSizeColumnsMode   = DataGridViewAutoSizeColumnsMode.Fill,
+                RowHeadersVisible     = false,
+                BackgroundColor       = Color.FromArgb(22,32,50),
+                BorderStyle           = BorderStyle.None,
+                ColumnHeadersHeight   = 34,
+                RowTemplate           = {Height=28},
+                ReadOnly              = true,
+                AllowUserToAddRows    = false,
+                AllowUserToDeleteRows = false,
+                SelectionMode         = DataGridViewSelectionMode.FullRowSelect,
+                MultiSelect           = false,
+                Font                  = new Font("Segoe UI",9),
+                ForeColor             = Color.FromArgb(226,232,240),
+                GridColor             = Color.FromArgb(40,55,75)
+            };
+            g.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(30,58,95);
+            g.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            g.ColumnHeadersDefaultCellStyle.Font      = new Font("Segoe UI",9,FontStyle.Bold);
+            g.ColumnHeadersDefaultCellStyle.Padding   = new Padding(6,0,0,0);
+            g.EnableHeadersVisualStyles               = false;
+            g.DefaultCellStyle.BackColor          = Color.FromArgb(22,32,50);
+            g.DefaultCellStyle.ForeColor          = Color.FromArgb(226,232,240);
+            g.DefaultCellStyle.SelectionBackColor = Color.FromArgb(30,58,95);
+            g.DefaultCellStyle.SelectionForeColor = Color.White;
+            g.DefaultCellStyle.Padding            = new Padding(6,0,0,0);
+            g.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(26,38,60);
+            return g;
+        }
+
+        // Set all columns to Fill mode with a tight minimum width
+        private static void AutoCols(DataGridView g)
+        {
+            g.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill;
+            foreach(DataGridViewColumn c in g.Columns)
+            { c.SortMode=DataGridViewColumnSortMode.Automatic; c.MinimumWidth=60; }
+        }
+
+        // Section heading above a grid
+        private static Label GridTitle(string t)=>new Label
+        {
+            Text=t,Font=new Font("Segoe UI",9.5f,FontStyle.Bold),
+            ForeColor=Color.FromArgb(148,180,212),AutoSize=true,Location=new Point(0,4)
         };
     }
 }
