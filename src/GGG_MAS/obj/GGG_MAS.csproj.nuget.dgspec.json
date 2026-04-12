@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\OEM\\Desktop\\Software engineering degree\\Year 2\\Semester 1\\Data processing and software modelling\\Assignment 1\\Code\\GGG_MAS_Clean\\GGG_MAS\\GGG_MAS.csproj": {}
+    "C:\\Users\\OEM\\Desktop\\Software engineering degree\\Year 2\\Semester 1\\Data processing and software modelling\\Assignment 1\\Code\\GGG_MAS_Final\\GGG_MAS\\GGG_MAS.csproj": {}
   },
   "projects": {
-    "C:\\Users\\OEM\\Desktop\\Software engineering degree\\Year 2\\Semester 1\\Data processing and software modelling\\Assignment 1\\Code\\GGG_MAS_Clean\\GGG_MAS\\GGG_MAS.csproj": {
+    "C:\\Users\\OEM\\Desktop\\Software engineering degree\\Year 2\\Semester 1\\Data processing and software modelling\\Assignment 1\\Code\\GGG_MAS_Final\\GGG_MAS\\GGG_MAS.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\OEM\\Desktop\\Software engineering degree\\Year 2\\Semester 1\\Data processing and software modelling\\Assignment 1\\Code\\GGG_MAS_Clean\\GGG_MAS\\GGG_MAS.csproj",
+        "projectUniqueName": "C:\\Users\\OEM\\Desktop\\Software engineering degree\\Year 2\\Semester 1\\Data processing and software modelling\\Assignment 1\\Code\\GGG_MAS_Final\\GGG_MAS\\GGG_MAS.csproj",
         "projectName": "GGG_MAS",
-        "projectPath": "C:\\Users\\OEM\\Desktop\\Software engineering degree\\Year 2\\Semester 1\\Data processing and software modelling\\Assignment 1\\Code\\GGG_MAS_Clean\\GGG_MAS\\GGG_MAS.csproj",
+        "projectPath": "C:\\Users\\OEM\\Desktop\\Software engineering degree\\Year 2\\Semester 1\\Data processing and software modelling\\Assignment 1\\Code\\GGG_MAS_Final\\GGG_MAS\\GGG_MAS.csproj",
         "packagesPath": "C:\\Users\\OEM\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\OEM\\Desktop\\Software engineering degree\\Year 2\\Semester 1\\Data processing and software modelling\\Assignment 1\\Code\\GGG_MAS_Clean\\GGG_MAS\\obj\\",
+        "outputPath": "C:\\Users\\OEM\\Desktop\\Software engineering degree\\Year 2\\Semester 1\\Data processing and software modelling\\Assignment 1\\Code\\GGG_MAS_Final\\GGG_MAS\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

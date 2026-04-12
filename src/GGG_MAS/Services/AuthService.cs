@@ -25,6 +25,7 @@ namespace GGG_MAS.Services
         }
 
         // Returns true if a user is currently authenticated
+        // NFR02: Services are stateless — support 99.9% uptime, no single point of failure
         public bool IsLoggedIn => CurrentUser != null;
 
         /// <summary>

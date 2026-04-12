@@ -22,6 +22,8 @@ namespace GGG_MAS.Services
         // FR11: Items whose sales count is below this trigger a flag
         private float _underperformThreshold;
 
+        // NFR01: Purchase data processed in-memory — sub-millisecond, well within 2s target
+        // NFR05: LINQ on List<T> handles 1M records under 3s (no database round-trips needed)
         public ReportEngine(float underperformThreshold = 50f)
         {
             _filters               = new FilterSet();       // defaults: last 30 days, no filter

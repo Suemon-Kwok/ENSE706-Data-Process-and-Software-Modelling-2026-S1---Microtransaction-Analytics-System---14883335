@@ -110,6 +110,8 @@ namespace GGG_MAS.Forms
 
         // ═══════════════ BUILD ═══════════════════════════════
 
+        // NFR06: Interface uses labelled controls, colour coding, and tooltips —
+        // usable without training for staff familiar with dashboards
         private void Build()
         {
             Text          = "GGG — Microtransaction Analytics System";
