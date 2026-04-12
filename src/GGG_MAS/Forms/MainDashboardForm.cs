@@ -341,7 +341,7 @@ namespace GGG_MAS.Forms
 
             // Left panel — docks left, takes 50% width via Resize event
             var pLeft = new Panel { Dock=DockStyle.Left, BackColor=ColBg, Width=500 };
-            var lblCat = GridTitle("🏆  Top Sellers by Category (BR-01)");
+            var lblCat = GridTitle("🏆  Top Sellers by Category");
             lblCat.Dock = DockStyle.Top;
             lblCat.Height = 24;
             _dgvTopCategory = MakeGrid();
@@ -351,7 +351,7 @@ namespace GGG_MAS.Forms
 
             // Right panel — fills the remaining space
             var pRight = new Panel { Dock=DockStyle.Fill, BackColor=ColBg };
-            var lblCls = GridTitle("🎮  Top by Class (BR-02)");
+            var lblCls = GridTitle("🎮  Top by Character Class");
             lblCls.Dock = DockStyle.Top;
             lblCls.Height = 24;
             _dgvTopClass = MakeGrid();
@@ -383,7 +383,7 @@ namespace GGG_MAS.Forms
                 Padding=new Padding(14,10,14,10)
             };
             var pt = new Panel { Dock=DockStyle.Top, Height=26, BackColor=Color.Transparent };
-            pt.Controls.Add(GridTitle("🌍  Revenue by Region & Spending Tier (BR-06, FR07)"));
+            pt.Controls.Add(GridTitle("🌍  Revenue by Region & Spending Tier"));
             _dgvDemographic=MakeGrid(); _dgvDemographic.Dock=DockStyle.Fill;
             // Add Fill first, then Top (reverse order for Dock stacking)
             _viewDemographic.Controls.Add(_dgvDemographic);
@@ -399,7 +399,7 @@ namespace GGG_MAS.Forms
                 Padding=new Padding(14,10,14,10)
             };
             var pt = new Panel { Dock=DockStyle.Top, Height=26, BackColor=Color.Transparent };
-            pt.Controls.Add(GridTitle("📈  Revenue Trends — Daily / Weekly / Monthly (FR10)"));
+            pt.Controls.Add(GridTitle("📈  Revenue Trends — Daily / Weekly / Monthly"));
             _dgvTrends=MakeGrid(); _dgvTrends.Dock=DockStyle.Fill;
             _viewTrends.Controls.Add(_dgvTrends);
             _viewTrends.Controls.Add(pt);
@@ -414,7 +414,7 @@ namespace GGG_MAS.Forms
                 Padding=new Padding(14,10,14,10)
             };
             var pt = new Panel { Dock=DockStyle.Top, Height=26, BackColor=Color.Transparent };
-            pt.Controls.Add(GridTitle("⚠   Underperforming MTX Items (FR11, BR-04, BR-05)"));
+            pt.Controls.Add(GridTitle("⚠   Underperforming MTX Items"));
             _dgvUnderperf=MakeGrid(); _dgvUnderperf.Dock=DockStyle.Fill;
             _viewUnderperf.Controls.Add(_dgvUnderperf);
             _viewUnderperf.Controls.Add(pt);
