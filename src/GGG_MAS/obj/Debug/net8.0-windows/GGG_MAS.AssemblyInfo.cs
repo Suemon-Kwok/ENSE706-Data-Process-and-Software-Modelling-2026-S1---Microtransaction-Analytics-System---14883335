@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GGG_MAS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4b647855a2fc48a2d5ef638a0b3c6d9aad01ca9c")]
 [assembly: System.Reflection.AssemblyProductAttribute("GGG_MAS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GGG_MAS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
