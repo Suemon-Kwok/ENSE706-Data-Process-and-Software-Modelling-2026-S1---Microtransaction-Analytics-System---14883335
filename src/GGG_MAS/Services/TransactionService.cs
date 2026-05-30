@@ -9,6 +9,21 @@
 
 // FR01–FR03: records item, timestamp, player, character class.
 
+// What does this file do
+// records new purchases from the UI. Looks up the item, creates a Transaction object,
+// calls IncrementSales() on the item, calls RecordPurchase() on the player, recalculates the player's spending tier, then saves to the repository.
+// Also contains the two in-memory repositories (InMemoryTransactionRepository and InMemoryItemRepository)
+
+// OOP concepts
+// Dependency Inversion and Low Coupling. Depends on ITransactionRepository and IItemRepository interfaces,
+// not concrete implementations — you could swap in a SQL database without touching this file.
+
+// Why OOP concepts were used
+// Dependency Inversion — "Depend on promises, not specifics" Dependency Inversion	Depend on the promise, not the specific thing
+// TransactionService takes ITransactionRepository and IItemRepository in its constructor —
+// not the concrete InMemoryTransactionRepository class. It works with the interface, not the implementation.
+// Why? It's the same reason above — flexibility and testability. In a real job, you'd swap the in-memory store for a real database.
+// With dependency inversion, you just plug in a different object that honours the same promise.
 
 namespace GGG_MAS.Services
 {

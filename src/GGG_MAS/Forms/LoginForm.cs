@@ -8,8 +8,14 @@
 
 // stores the session in AuthService for the lifetime of the app.
 
+// What does this file do
+// the login window you see on startup. Two text boxes, a Sign In button. On click, hands credentials to AuthService.
+// On success, closes with DialogResult.OK so Program.cs knows to open the dashboard.
+// Clears the password field on failure and shows a generic error (never reveals which field was wrong)
 
-
+// OOP Concepts
+// Dependency Injection. AuthService is injected through the constructor rather than created inside the form —
+// the form doesn't know or care how auth works internally.
 
 namespace GGG_MAS.Forms
 {

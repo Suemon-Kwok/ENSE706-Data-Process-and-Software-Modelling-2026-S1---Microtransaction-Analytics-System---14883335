@@ -6,7 +6,9 @@
 
 // Contract for any class that generates analytics reports.
 
-
+// What does this file do
+// another contract, this time for the report engine. Any report engine must implement GenerateReport(), ExportReport(), and ApplyFilter().
+// This means you could swap out the engine without touching the rest of the code.
 
 namespace GGG_MAS.Services
 {

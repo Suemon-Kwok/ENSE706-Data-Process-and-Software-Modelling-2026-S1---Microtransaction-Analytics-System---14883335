@@ -1,86 +1,66 @@
-//Name : Suemon Kwok 
-
-// Student ID : 14883335
-
+// Name: Suemon Kwok
+// Student ID: 14883335
 // Program.cs — Application entry point
+//
+// Phase 2 change: AuthService is now a Singleton.
+// Instead of new AuthService(systemUsers), all code calls AuthService.GetInstance().
+// SeedData still creates the catalogue, players, and transactions as before.
+// The Singleton's private constructor seeds its own user list internally,
+// so CreateSystemUsers() is no longer passed to AuthService.
 
-// Bootstraps all services, seeds demo data, and launches
+using GGG_MAS.Forms;
+using GGG_MAS.Models;
+using GGG_MAS.Repositories;
+using GGG_MAS.Services;
 
-// the login screen. Composes the dependency graph manually
-
-// (no IoC container needed beyond this project scope.
-
-
-using GGG_MAS.Forms;                                                                        // imports the LoginForm and MainDashboardForm UI classes
-
-using GGG_MAS.Models;                                                                       // imports model classes like PlayerAccount, MTXItem, etc.
-
-using GGG_MAS.Repositories;                                                                 // imports the in-memory repository implementations
-
-using GGG_MAS.Services;                                                                     // imports AuthService, ReportEngine, TransactionService, SeedData
-
-namespace GGG_MAS                                                                           // declares the root namespace for the whole application
+namespace GGG_MAS
 {
-    internal static class Program // static class means it cannot be instantiated : entry point only
+    internal static class Program
     {
-        [STAThread]                                                                         // required for Windows Forms: marks the main thread as Single-Threaded Apartment (COM interop)
-
-        static void Main()                                                                  // the application's entry point : runs first when the .exe is launched
+        [STAThread]
+        static void Main()
         {
-            // Enable Windows visual styles for native-looking controls
-            Application.EnableVisualStyles(); // makes controls like buttons use the current Windows theme
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
 
-            Application.SetCompatibleTextRenderingDefault(false);                           // use GDI+ text rendering (better quality than GDI)
+            // ── Repositories ──────────────────────────────────────────────
+            var txRepo   = new InMemoryTransactionRepository();
+            var itemRepo = new InMemoryItemRepository();
 
-            //Bootstrap repositories (in-memory stores)
-            var txRepo   = new InMemoryTransactionRepository();                             // stores transactions: creates the in-memory store that holds all transactions
+            // ── Seed catalogue items ──────────────────────────────────────
+            var catalogue = SeedData.CreateCatalogue();
+            foreach (var item in catalogue)
+                itemRepo.Add(item);
 
-            var itemRepo = new InMemoryItemRepository();                                    // stores MTX catalogue: creates the in-memory store that holds all MTX catalogue items
+            // ── Seed demo players ─────────────────────────────────────────
+            var players = SeedData.CreatePlayers();
 
-            //Seed catalogue items
+            // ── Seed 250 sample transactions ──────────────────────────────
+            SeedData.SeedTransactions(txRepo, itemRepo, players);
 
-            // All item types from the UML diagram are represented (FR02)
-            var catalogue = SeedData.CreateCatalogue();                                     // generates the list of WeaponSkins, Pets, Bundles, etc.
-            foreach (var item in catalogue)                                                 // loops over every generated item
-                itemRepo.Add(item);                                                         // stores each item in the in-memory item repository
+            // ── Compose services ──────────────────────────────────────────
+            var txService    = new TransactionService(txRepo, itemRepo);
+            var reportEngine = new ReportEngine(underperformThreshold: 15f);
 
-            //Seed demo players
-            var players = SeedData.CreatePlayers();                                         // creates 10 sample PlayerAccount objects with different regions and tiers
+            // Phase 2: obtain AuthService via Singleton — no constructor call.
+            // The Singleton seeds its own user list (analyst, marketing,
+            // developer, finance) identically to SeedData.CreateSystemUsers().
+            var auth = AuthService.GetInstance();
 
-            //Seed 250 sample transactions (FR01)
-            SeedData.SeedTransactions(txRepo, itemRepo, players);                           // generates 250 random transactions spread across the last 90 days
-
-            //Compose services
-            var txService  = new TransactionService(txRepo, itemRepo);                      // creates the service that records new purchases
-
-            var reportEngine = new ReportEngine(underperformThreshold: 15f);                // creates the analytics engine; items with <15 sales are flagged
-
-            // FR13: create four role-based system users
-            var systemUsers = SeedData.CreateSystemUsers();                                 // creates analyst, marketing, developer, finance accounts
-
-            var auth        = new AuthService(systemUsers);                                 // creates the authentication service and loads the user list
-
-            //Show login screen first
-            bool loggedIn = false;                                                          // flag that tracks whether authentication has succeeded
-
-            while (!loggedIn)                                                               // keep showing the login form until the user successfully signs in
+            // ── Login loop ────────────────────────────────────────────────
+            bool loggedIn = false;
+            while (!loggedIn)
             {
-                // Show login dialog; if user closes it without logging in, exit
-                using var loginForm = new LoginForm(auth);                                  // creates the login dialog, injecting the auth service
-                if (loginForm.ShowDialog() != DialogResult.OK)                              // shows the form as a modal dialog; waits for the user to close it
-                    return;                                                                 // user closed the window — exit the application
+                using var loginForm = new LoginForm(auth);
+                if (loginForm.ShowDialog() != DialogResult.OK)
+                    return;
 
-                loggedIn = auth.IsLoggedIn;                                                 // check the auth service to see if the login succeeded
+                loggedIn = auth.IsLoggedIn;
             }
 
-            //Launch main dashboard
-           
-            // All services are injected — dependencies flow downward only
-            Application.Run(new MainDashboardForm(                                          // starts the Windows Forms message loop with the dashboard as the main form
-                auth, reportEngine, txRepo, itemRepo, txService, players));                 // injects all services and data into the dashboard
-
-            // If the user logs out and the form closes, restart the loop
-
+            // ── Launch dashboard ──────────────────────────────────────────
+            Application.Run(new MainDashboardForm(
+                auth, reportEngine, txRepo, itemRepo, txService, players));
         }
     }
 }

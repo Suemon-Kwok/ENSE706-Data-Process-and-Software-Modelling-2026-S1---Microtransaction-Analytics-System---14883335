@@ -8,6 +8,44 @@
 
 // Demonstrates: Abstraction, Inheritance, High Cohesion.
 
+// What does this file do
+// the template for every item in the shop. It's abstract, meaning you can never create a plain "MTXItem" — you must use a specific subclass.
+// It holds shared fields like Name, Price, SalesCount, and the IncrementSales() method.
+// It also forces every subclass to implement GetDescription().
+
+// OOP Concents
+// Abstraction and Encapsulation. abstract class cannot be created directly. _price and _salesCount are private —
+// only readable via GetPrice() and GetSalesCount(), only modifiable via IncrementSales()
+
+// Why OOP concepts were used
+// Abstraction — "Show only what's needed" Abstraction	A skeleton that forces subclasses to fill in the details
+// MTXItem is an abstract class — you can never create a plain MTXItem.
+// You must use a specific type like WeaponSkin or PetItem.
+// It provides the shared skeleton (price, sales count, name) but forces subclasses to fill in GetDescription() themselves.
+// Why? There's no such thing as a generic "item" in real life — it's always a specific thing.
+// Abstraction enforces that while sharing common code.
+
+// Inheritance — "Don't repeat yourself" Inheritance	Subclasses get the parent's code for free
+// WeaponSkin, ArmourSkin, PetItem, Bundle etc. all inherit from MTXItem.
+// They automatically get all the shared fields (name, price, sales counter) without rewriting them.
+// Each just adds its own unique stuff — WeaponSkin adds WeaponClass and EffectTier.
+// Why? Without inheritance, you'd copy-paste the same price/sales logic into 7 classes.
+// Change one thing and you'd have to update all 7. Inheritance means you change it once.
+
+/*
+Abstract class abstraction: MTXItem is abstract — it cannot be instantiated directly. 
+It provides shared code (price, sales counter, name) but forces every subclass to implement GetDescription(). 
+You can never write new MTXItem() — you must write new WeaponSkin()
+*/
+
+/*
+Encapsulation — what it is and how it applies here
+Encapsulation means keeping internal state private and controlling access through public methods.
+In MTXItem: private float _price and private int _salesCount cannot be changed from outside. GetPrice() provides read-only access. IncrementSales() is the only way to change _salesCount — it adds 1 and nothing else. No external code can arbitrarily set sales to 0 or subtract from it.
+In SystemUser: the password is never stored as plaintext — only as a SHA-256 hash in a private field. Authenticate() is the only way to verify credentials.
+
+Why is _price private and not public?' Answer: if _price were public, any code anywhere could set it to 0 or a negative number. Private + controlled method = invariant protection. 
+ */
 
 namespace GGG_MAS.Models                                                                                            // belongs to the shared model namespace
 {

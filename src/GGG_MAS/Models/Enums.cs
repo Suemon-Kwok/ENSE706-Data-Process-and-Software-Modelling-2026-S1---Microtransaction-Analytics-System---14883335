@@ -6,7 +6,10 @@
 
 // Matches the UML Class Diagram enumerations.
 
-
+// What does this file do
+// a dictionary of fixed labels. It defines all the category names your app uses: ItemType (WeaponSkin, Pet, Bundle etc.), CharacterClass (Marauder, Ranger etc.),
+// SpendingTier (Casual, Regular, HighValue), UserRole (Analyst, Marketing etc.), and
+// ExportFormat (CSV, PDF, JSON). Nothing runs here — it just names things
 
 namespace GGG_MAS.Models                                                                                   // all model types live in this shared namespace
 {

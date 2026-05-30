@@ -8,6 +8,23 @@
 
 // FR04, FR09, FR10, FR11 — best sellers, filters, trends, flags.
 
+// What does this file do
+// the analytics brain. Implements IReportGenerator.
+// Takes all transactions and filters, then calculates every metric: total revenue, top item per category, top item per character class,
+// revenue by date, items below threshold, revenue by region, bundle vs individual split, and spending tier distribution
+
+// OOP Concept
+// Single Responsibility and Polymorphism. Implements IReportGenerator.
+// All analytics computation is isolated here. Works on IEnumerable<Transaction> —
+// doesn't care what kind of item is inside each transaction.
+
+// Why OOP concepts were used
+// Polymorphism — "Treat different things the same way" Polymorphism	Different objects, same method name, different behaviour
+// The ReportEngine doesn't care whether it's looking at a WeaponSkin or a Bundle —
+// it just calls GetDescription() and GetPrice() on whatever it's given. Each class responds differently,
+// but the calling code doesn't need to know that.
+// Why? It means you can add a brand new item type (say, CharacterEffect)
+// and the report engine works with it automatically — no changes needed.
 
 namespace GGG_MAS.Services
 {

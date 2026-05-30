@@ -8,7 +8,26 @@
 
 // HideoutDecoration, StashTabExpansion, Bundle
 
+// What does this file do
+// the seven specific item types: WeaponSkin, ArmourSkin, PetItem, PortalEffect, HideoutDecoration, StashTabExpansion, and Bundle.
+// Each inherits from MTXItem and adds its own unique fields (e.g. WeaponSkin adds WeaponClass and EffectTier).
+// Bundle also contains a private list of other MTXItem objects
 
+// OOP Concepts
+// Inheritance and Polymorphism. All seven classes inherit from MTXItem.
+// Each overrides GetDescription() differently.
+// Bundle also demonstrates Composition — it contains a List<MTXItem>.
+
+// Why OOP concepts were used
+// Composition	An object contains other objects (Bundle holding items)
+// Composition (inside Bundle)
+// The Bundle class contains a List<MTXItem> — a bundle is made up of other items.
+// This is composition: "has-a" rather than "is-a".
+// Why? A bundle isn't a special kind of item that magically includes others through inheritance —
+// it literally holds other items. Composition models that naturally.
+// Line 162 shows how Bundle has a private List<MTXItem> _items.
+// The AddItem() method allows adding items to the bundle, and GetItems() returns a copy of that list.
+// This way, the Bundle class manages its own collection of items without exposing the internal list directly.
 
 namespace GGG_MAS.Models                                                                                                                       // all concrete item types live in the same model namespace as MTXItem
 {

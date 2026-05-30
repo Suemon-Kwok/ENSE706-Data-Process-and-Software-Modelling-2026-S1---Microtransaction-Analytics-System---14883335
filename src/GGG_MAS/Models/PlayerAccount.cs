@@ -10,6 +10,21 @@
 
 // NFR03: Only non-personal identifiers stored (privacy).
 
+// What does this file do
+// represents a player. It stores their region, spending tier, and purchase history (as a private HashSet).
+// It has RecordPurchase() (to log a purchase) and UpdateTier() (to recalculate Casual/Regular/HighValue based on total spend).
+// No real names or emails are stored — privacy by design
+
+// OOP Concepts
+// Encapsulation. Purchase history is a private HashSet; only exposed as IReadOnlyCollection so nothing outside can add to it directly.
+// UpdateTier() is the only way to change spending tier.
+
+// Why OOP concepts were used
+// Encapsulation — "Keep internals private" Encapsulation	Private data, public doors — control who can change what
+// the purchase history is a private HashSet. Nobody outside can just add items to it directly —
+// they have to go through RecordPurchase(). Same with _price and _salesCount in MTXItem — only GetPrice() and IncrementSales() can touch them.
+// Why? It prevents bugs. If any part of the code could change the sales count directly, you'd have no guarantee it's correct.
+// Encapsulation means only the right code can change the right data
 
 namespace GGG_MAS.Models
 {

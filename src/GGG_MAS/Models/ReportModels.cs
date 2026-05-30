@@ -8,6 +8,13 @@
 
 // FR09, FR10, FR11 — filterable, trend, underperforming.
 
+// What does this file do 
+// three helper objects: FilterSet (what filters the user has applied), DateRange (a start/end date with daily/weekly/monthly granularity),
+// and Report (a big container holding all the calculated output — total revenue, top sellers, trends, underperforming items, etc.).
+
+// OOP concepts
+// Value Objects (just a description of something) and Data Transfer Object pattern (carry data from one place to another). FilterSet, DateRange, and Report carry data between layers without behaviour.
+// Report is a DTO — it holds pre-calculated results that the UI just displays
 
 namespace GGG_MAS.Models                                                                                                                        // belongs to the shared model namespace
 {

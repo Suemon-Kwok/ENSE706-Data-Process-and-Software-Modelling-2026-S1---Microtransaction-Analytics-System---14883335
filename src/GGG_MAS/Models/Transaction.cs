@@ -10,6 +10,15 @@
 
 // FR05: bundleFlag distinguishes bundle vs individual purchase.
 
+// What does this file do 
+// a single purchase event, frozen in time. It records the item, player, price, timestamp, character class, and bundle flag.
+// It also captures a DemographicRecord snapshot (region + spending tier at time of purchase), so even if the player's tier changes later,
+// the historical record stays accurate.
+
+// OOP Concept
+// Encapsulation — "Keep internals private" Encapsulation	Private data, public doors — control who can change what
+// Encapsulation and Abstraction. _item is stored as ISalesItem (the interface), not the concrete type — loose coupling.
+// DemographicRecord is an immutable value object, decoupled from the mutable PlayerAccount.
 
 namespace GGG_MAS.Models                                                                                                                // belongs to the shared model namespace
 {

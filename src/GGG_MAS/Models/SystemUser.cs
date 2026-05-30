@@ -10,6 +10,13 @@
 
 // NFR03: Passwords stored as SHA-256 hashes only.
 
+// What this file does
+// represents a staff member logging into the system. Stores username, role, and a SHA-256 hash of their password (never the real password).
+// Has Authenticate() to check login attempts, CanExport() and CanConfigure() to gate what they're allowed to do
+
+// OOP Concepts
+// Encapsulation and Principle of Least Privilege. Password is immediately hashed; _passwordHash is private.
+// CanExport() and CanConfigure() gate access by role — each role gets only what it needs.
 
 using System.Security.Cryptography;                                                                                                             // provides the SHA256 hashing algorithm        
 

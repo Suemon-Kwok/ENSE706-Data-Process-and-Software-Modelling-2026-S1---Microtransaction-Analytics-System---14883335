@@ -1,3 +1,6 @@
+// Name : Suemon Kwok
+
+// Student ID : 14883335
 
 // MainDashboardForm.cs — AnalyticsDashboard (UML)
 
@@ -23,6 +26,14 @@
 
 //   • AutoCols() with MinimumWidth=60 keeps columns tight but readable
 
+// What does this file do
+// the main screen. Contains the sidebar, filter bar, four view panels (Sales, Demographics, Revenue Trends, Underperforming),
+// four KPI stat cards, and all data grids. When the user clicks Apply, it calls ReportEngine.GenerateReport() and populates all views with fresh data.
+// Also handles opening the Add Transaction dialog and the Export flow
+
+// OOP Concepts
+// Dependency Injection (all services injected), Separation of Concerns (UI logic only; business logic stays in services),
+// Polymorphism (role checks via CanExport() and CanConfigure() on SystemUser).
 
 namespace GGG_MAS.Forms
 {
@@ -54,6 +65,8 @@ namespace GGG_MAS.Forms
         private Button _btnTrends    = null!;                                                                                   // switches to the Revenue Trends view
 
         private Button _btnUnderperf = null!;                                                                                   // switches to the Underperforming Items view
+
+        private Button _btnChart     = null!;                                                                                   // switches to the Revenue Chart view
 
         private Button _btnAddTx     = null!;                                                                                   // opens the Add Transaction dialog        
 
@@ -95,6 +108,8 @@ namespace GGG_MAS.Forms
 
         private Panel _viewUnderperf   = null!;                                                                                 // Underperforming Items panel
 
+        private Panel _viewChart       = null!;                                                                                 // Revenue Chart panel (line chart of highs/lows)
+
 
         // Data grids
         private DataGridView _dgvTopCategory = null!;                                                                           // top sellers by category (BR-01)
@@ -131,7 +146,10 @@ namespace GGG_MAS.Forms
 
         private readonly List<PlayerAccount>    _players;                                                                       // passed to AddTransactionForm for the player dropdown
 
-        private Report? _currentReport;                                                                                         // the most recently generated Report; used by export        
+        private Report? _currentReport;                                                                                         // the most recently generated Report; used by export
+
+        // Stores the sorted revenue trend data used by the chart painter
+        private List<(string Label, float Revenue)> _chartData = new();
 
         // Theme colour constants
         private static readonly Color ColBg      = Color.FromArgb(18,  24,  38);                                                // main dark navy background
@@ -218,8 +236,10 @@ namespace GGG_MAS.Forms
             _btnTrends    = SideBtn("📈  Revenue Trends",   ref y);
             
             _btnUnderperf = SideBtn("⚠   Underperforming", ref y);
+
+            _btnChart     = SideBtn("📉  Revenue Chart",    ref y);
             
-            foreach (var b in new[]{_btnSales,_btnDemograph,_btnTrends,_btnUnderperf})
+            foreach (var b in new[]{_btnSales,_btnDemograph,_btnTrends,_btnUnderperf,_btnChart})
                 _pnlSidebar.Controls.Add(b);                                                                                    // adds all four buttons in one loop
 
             y += 8;                                                                                                             // adds a small gap before the ACTIONS section
@@ -266,6 +286,8 @@ namespace GGG_MAS.Forms
             _btnTrends.Click    += (_,__)=>{ ShowView(_viewTrends);      HighlightNav(_btnTrends);    };
             
             _btnUnderperf.Click += (_,__)=>{ ShowView(_viewUnderperf);   HighlightNav(_btnUnderperf); };
+
+            _btnChart.Click     += (_,__)=>{ ShowView(_viewChart);       HighlightNav(_btnChart);     };
             
             _btnAddTx.Click     += (_,__)=> OpenAddTx();                                                                        // opens the Add Transaction modal dialog
 
@@ -380,6 +402,8 @@ namespace GGG_MAS.Forms
             BuildViewTrends();                                                                                              // creates the Revenue Trends view panel
 
             BuildViewUnderperf();                                                                                           // creates the Underperforming view panel
+
+            BuildViewChart();                                                                                               // creates the Revenue Chart view panel
 
             // Controls added in reverse dock order so DockStyle.Top panels stack correctly
 
@@ -687,6 +711,8 @@ namespace GGG_MAS.Forms
             
             PopulateUnderperf(_currentReport);
 
+            PopulateChart(_currentReport);
+
             _btnExport.Visible = _auth.CurrentUser?.CanExport() ?? false;
         }
 
@@ -777,7 +803,74 @@ namespace GGG_MAS.Forms
                     row.DefaultCellStyle.ForeColor=Color.FromArgb(248,113,113);
         }
 
-        // ACTIONS 
+        // Revenue Chart view — custom painted line/bar chart showing highs and lows
+        private RevenueChartPanel _chartPanel = null!;
+
+        private void BuildViewChart()
+        {
+            _viewChart = new Panel
+            {
+                Dock        = DockStyle.Fill,
+                BackColor   = ColBg,
+                Padding     = new Padding(14, 10, 14, 10)
+            };
+
+            // Section heading row
+            var pt = new Panel { Dock = DockStyle.Top, Height = 28, BackColor = Color.Transparent };
+            pt.Controls.Add(GridTitle("📉  Revenue Chart — Highs, Lows & Trend (Daily / Weekly / Monthly)"));
+            _viewChart.Controls.Add(pt);
+
+            // Legend row
+            var pLegend = new Panel { Dock = DockStyle.Top, Height = 24, BackColor = Color.Transparent };
+            void AddLeg(string text, Color col, int x)
+            {
+                pLegend.Controls.Add(new Panel
+                {
+                    Location  = new Point(x, 6),
+                    Size      = new Size(14, 14),
+                    BackColor = col
+                });
+                pLegend.Controls.Add(new Label
+                {
+                    Text      = text,
+                    Font      = new Font("Segoe UI", 8.5f),
+                    ForeColor = Color.FromArgb(200, 210, 220),
+                    AutoSize  = true,
+                    Location  = new Point(x + 18, 5)
+                });
+            }
+            AddLeg("Revenue Line",   Color.FromArgb(56,  182, 255), 0);
+            AddLeg("Peak Period",    Color.FromArgb(52,  211, 153), 120);
+            AddLeg("Trough Period",  Color.FromArgb(248, 113, 113), 250);
+            AddLeg("Average Line",   Color.FromArgb(251, 191,  36), 380);
+            _viewChart.Controls.Add(pLegend);
+
+            // Spacer
+            _viewChart.Controls.Add(new Panel
+                { Dock = DockStyle.Top, Height = 6, BackColor = Color.Transparent });
+
+            // Chart panel (custom painted) — fills all remaining space
+            _chartPanel = new RevenueChartPanel
+            {
+                Dock      = DockStyle.Fill,
+                BackColor = Color.FromArgb(16, 22, 36)
+            };
+            _viewChart.Controls.Add(_chartPanel);
+        }
+
+        private void PopulateChart(Report r)
+        {
+            _chartData = r.RevenueTrend
+                .OrderBy(kv => kv.Key)
+                .Select(kv => (kv.Key, kv.Value))
+                .ToList();
+
+            _chartPanel.SetData(_chartData);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────
+        // ACTIONS
+
 
         // Opens the Add Transaction modal dialog (FR14 role check)
 
@@ -816,7 +909,8 @@ namespace GGG_MAS.Forms
                 {
                     ExportFormat.CSV  =>"CSV Files|*.csv",
                     ExportFormat.JSON =>"JSON Files|*.json",
-                    _                 => "Text Files|*.txt"                                                              // PDF exports as a .txt file
+                    ExportFormat.PDF  =>"PDF Files|*.pdf",
+                    _                 =>"All Files|*.*"
                 },
                 FileName=$"GGG_Report_{DateTime.Now:yyyyMMdd_HHmm}"                                                      // default filename with timestamp
             };
@@ -955,7 +1049,7 @@ namespace GGG_MAS.Forms
 
         private void ShowView(Panel target)
         {
-            foreach(var v in new[]{_viewSales,_viewDemographic,_viewTrends,_viewUnderperf})
+            foreach(var v in new[]{_viewSales,_viewDemographic,_viewTrends,_viewUnderperf,_viewChart})
 
                 _pnlViewHost.Controls.Remove(v);                                                                      // removes all view panels from the host (only one can be visible)                                                               
             
@@ -968,11 +1062,11 @@ namespace GGG_MAS.Forms
 
         private void HighlightNav(Button active)
         {
-            foreach(var b in new[]{_btnSales,_btnDemograph,_btnTrends,_btnUnderperf})
+            foreach(var b in new[]{_btnSales,_btnDemograph,_btnTrends,_btnUnderperf,_btnChart})
             {
-                b.BackColor = b==active ? ColHeader : Color.Transparent;                                              // active = blue background; inactive = transparent  
+                b.BackColor = b==active ? ColHeader : Color.Transparent;
 
-                b.ForeColor = b==active ? Color.White : ColMuted;                                                     // active = white text; inactive = muted grey          
+                b.ForeColor = b==active ? Color.White : ColMuted;
             }
         }
 
@@ -1138,5 +1232,243 @@ namespace GGG_MAS.Forms
             
             ForeColor=Color.FromArgb(148,180,212),AutoSize=true,Location=new Point(0,4)                             // muted blue-grey to keep headings subtle
         };
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════════════
+    // RevenueChartPanel
+    // Custom-painted control that renders the revenue trend as a line chart.
+    // Shows:  • Line connecting all data points
+    //         • Filled area under the line (semi-transparent)
+    //         • Colour-coded bar markers (teal = normal, green = peak, red = trough)
+    //         • Dashed horizontal average line
+    //         • X-axis labels (period) and Y-axis labels (revenue amounts)
+    //         • Peak and trough value callouts
+    // ═════════════════════════════════════════════════════════════════════════════════
+    internal sealed class RevenueChartPanel : Panel
+    {
+        private List<(string Label, float Revenue)> _data = new();
+
+        // Colour palette (matching dashboard theme)
+        private static readonly Color ColLine    = Color.FromArgb(56,  182, 255);   // bright blue line
+        private static readonly Color ColFill    = Color.FromArgb(40,  56,  182, 255); // translucent fill
+        private static readonly Color ColPeak    = Color.FromArgb(52,  211, 153);   // teal-green peak bar
+        private static readonly Color ColTrough  = Color.FromArgb(248, 113, 113);   // soft red trough bar
+        private static readonly Color ColNormal  = Color.FromArgb(60,  100, 160);   // muted blue normal bar
+        private static readonly Color ColAvg     = Color.FromArgb(251, 191,  36);   // amber average line
+        private static readonly Color ColAxis    = Color.FromArgb(55,  70,  90);    // dark grey axis lines
+        private static readonly Color ColLabel   = Color.FromArgb(148, 180, 212);   // muted blue-grey labels
+        private static readonly Color ColCallout = Color.FromArgb(220, 230, 240);   // near-white callout text
+
+        public RevenueChartPanel() { DoubleBuffered = true; }
+
+        public void SetData(List<(string Label, float Revenue)> data)
+        {
+            _data = data ?? new List<(string, float)>();
+            Invalidate();   // triggers a repaint with the new data
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            var g = e.Graphics;
+            g.SmoothingMode      = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.TextRenderingHint  = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+
+            int w = Width;
+            int h = Height;
+
+            // ── Margins ────────────────────────────────────────────────────────────
+            int marginL = 72;   // space for Y-axis labels
+            int marginR = 20;
+            int marginT = 30;
+            int marginB = 54;   // space for X-axis labels
+
+            int chartW = w - marginL - marginR;
+            int chartH = h - marginT - marginB;
+
+            if (chartW < 10 || chartH < 10) return;
+
+            // ── Background grid ────────────────────────────────────────────────────
+            using var axPen = new Pen(ColAxis, 1f) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dot };
+            int gridLines = 5;
+            for (int i = 0; i <= gridLines; i++)
+            {
+                int y = marginT + (int)(chartH * i / (float)gridLines);
+                g.DrawLine(axPen, marginL, y, marginL + chartW, y);
+            }
+
+            // ── Empty state ────────────────────────────────────────────────────────
+            if (_data.Count == 0)
+            {
+                using var noFont = new Font("Segoe UI", 11);
+                var msg = "No data — adjust the date range and click Apply.";
+                var sz  = g.MeasureString(msg, noFont);
+                g.DrawString(msg, noFont, Brushes.Gray,
+                    (w - sz.Width) / 2f, (h - sz.Height) / 2f);
+                return;
+            }
+
+            // ── Value range ────────────────────────────────────────────────────────
+            float maxV = _data.Max(d => d.Revenue);
+            float minV = _data.Min(d => d.Revenue);
+            float avg  = _data.Average(d => d.Revenue);
+
+            // Pad max slightly so the top data point isn't clipped
+            float rangeTop = maxV * 1.08f;
+            float rangeBot = 0f;   // always start Y-axis at zero for honest charts
+            float range    = rangeTop - rangeBot;
+            if (range < 0.01f) range = 1f;
+
+            // ── Helper: value → pixel y ────────────────────────────────────────────
+            float ToY(float v) =>
+                marginT + chartH * (1f - (v - rangeBot) / range);
+
+            // ── Helper: index → pixel x ───────────────────────────────────────────
+            float spacing = chartW / (float)Math.Max(_data.Count - 1, 1);
+            float ToX(int i) => marginL + i * spacing;
+
+            // ── Identify peak and trough indices ──────────────────────────────────
+            int peakIdx   = 0;
+            int troughIdx = 0;
+            for (int i = 1; i < _data.Count; i++)
+            {
+                if (_data[i].Revenue > _data[peakIdx].Revenue)   peakIdx   = i;
+                if (_data[i].Revenue < _data[troughIdx].Revenue) troughIdx = i;
+            }
+
+            // ── Bar markers (drawn first so line sits on top) ──────────────────────
+            int barW = Math.Max(2, (int)(spacing * 0.55f));
+            for (int i = 0; i < _data.Count; i++)
+            {
+                float x    = ToX(i);
+                float yTop = ToY(_data[i].Revenue);
+                float yBot = ToY(0f);
+
+                Color barCol = i == peakIdx   ? ColPeak :
+                               i == troughIdx ? ColTrough : ColNormal;
+
+                using var barBrush = new SolidBrush(Color.FromArgb(160, barCol));
+                g.FillRectangle(barBrush,
+                    x - barW / 2f, yTop,
+                    barW, yBot - yTop);
+            }
+
+            // ── Filled area under line ─────────────────────────────────────────────
+            if (_data.Count > 1)
+            {
+                var fillPts = new List<PointF>();
+                fillPts.Add(new PointF(ToX(0), ToY(0)));
+                for (int i = 0; i < _data.Count; i++)
+                    fillPts.Add(new PointF(ToX(i), ToY(_data[i].Revenue)));
+                fillPts.Add(new PointF(ToX(_data.Count - 1), ToY(0)));
+
+                using var fillBrush = new SolidBrush(Color.FromArgb(35, ColLine));
+                g.FillPolygon(fillBrush, fillPts.ToArray());
+            }
+
+            // ── Line connecting data points ────────────────────────────────────────
+            if (_data.Count > 1)
+            {
+                var pts = _data.Select((d, i) => new PointF(ToX(i), ToY(d.Revenue))).ToArray();
+                using var linePen = new Pen(ColLine, 2.5f);
+                g.DrawLines(linePen, pts);
+            }
+
+            // ── Data point dots ────────────────────────────────────────────────────
+            for (int i = 0; i < _data.Count; i++)
+            {
+                float cx = ToX(i);
+                float cy = ToY(_data[i].Revenue);
+                float r  = i == peakIdx || i == troughIdx ? 6f : 4f;
+                Color dc = i == peakIdx   ? ColPeak :
+                           i == troughIdx ? ColTrough : ColLine;
+
+                using var dotBrush = new SolidBrush(dc);
+                g.FillEllipse(dotBrush, cx - r, cy - r, r * 2, r * 2);
+                using var dotPen = new Pen(Color.FromArgb(220, 230, 240), 1.2f);
+                g.DrawEllipse(dotPen, cx - r, cy - r, r * 2, r * 2);
+            }
+
+            // ── Average dashed line ────────────────────────────────────────────────
+            float avgY = ToY(avg);
+            using var avgPen = new Pen(ColAvg, 1.5f)
+                { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash };
+            g.DrawLine(avgPen, marginL, avgY, marginL + chartW, avgY);
+
+            // Average label on right edge
+            using var avgFont  = new Font("Segoe UI", 7.5f);
+            using var avgBrush = new SolidBrush(ColAvg);
+            g.DrawString($"Avg ${avg:N0}", avgFont, avgBrush,
+                marginL + chartW + 3, avgY - 7);
+
+            // ── Peak / Trough callout boxes ────────────────────────────────────────
+            DrawCallout(g, $"▲ ${_data[peakIdx].Revenue:N2}",
+                ToX(peakIdx), ToY(_data[peakIdx].Revenue) - 28,
+                ColPeak);
+
+            if (troughIdx != peakIdx)
+                DrawCallout(g, $"▼ ${_data[troughIdx].Revenue:N2}",
+                    ToX(troughIdx), ToY(_data[troughIdx].Revenue) + 6,
+                    ColTrough);
+
+            // ── Y-axis labels ──────────────────────────────────────────────────────
+            using var yFont  = new Font("Segoe UI", 7.5f);
+            using var yBrush = new SolidBrush(ColLabel);
+            for (int i = 0; i <= gridLines; i++)
+            {
+                float v  = rangeBot + range * (1f - i / (float)gridLines);
+                float py = marginT + (int)(chartH * i / (float)gridLines);
+                string lbl = v >= 1000 ? $"${v / 1000:F1}k" : $"${v:F0}";
+                var sz = g.MeasureString(lbl, yFont);
+                g.DrawString(lbl, yFont, yBrush,
+                    marginL - sz.Width - 4, py - sz.Height / 2f);
+            }
+
+            // ── X-axis labels ──────────────────────────────────────────────────────
+            // Show at most 12 labels to avoid crowding
+            using var xFont  = new Font("Segoe UI", 7.5f);
+            using var xBrush = new SolidBrush(ColLabel);
+            int step = Math.Max(1, (int)Math.Ceiling(_data.Count / 12.0));
+            for (int i = 0; i < _data.Count; i += step)
+            {
+                float px  = ToX(i);
+                string lbl = _data[i].Label.Length > 10
+                             ? _data[i].Label[^10..] : _data[i].Label;
+                var sz = g.MeasureString(lbl, xFont);
+
+                // Rotate label slightly by drawing into a transformed state
+                var state = g.Save();
+                g.TranslateTransform(px - sz.Height / 2f,
+                    marginT + chartH + 4 + sz.Width);
+                g.RotateTransform(-90);
+                g.DrawString(lbl, xFont, xBrush, 0, 0);
+                g.Restore(state);
+            }
+
+            // ── Axis border lines ──────────────────────────────────────────────────
+            using var borderPen = new Pen(Color.FromArgb(70, 90, 115), 1f);
+            g.DrawLine(borderPen, marginL, marginT, marginL, marginT + chartH);               // Y-axis
+            g.DrawLine(borderPen, marginL, marginT + chartH,
+                marginL + chartW, marginT + chartH);                                           // X-axis
+        }
+
+        // Draws a small rounded-rectangle callout label above a data point
+        private static void DrawCallout(Graphics g, string text, float cx, float cy,
+            Color accent)
+        {
+            using var font  = new Font("Segoe UI", 8f, FontStyle.Bold);
+            using var brush = new SolidBrush(ColCallout);
+            var sz  = g.MeasureString(text, font);
+            float px = cx - sz.Width / 2f;
+            float py = cy;
+
+            // Background pill
+            var rect = new RectangleF(px - 4, py - 2, sz.Width + 8, sz.Height + 4);
+            using var bgBrush = new SolidBrush(Color.FromArgb(200, 20, 28, 42));
+            using var acPen   = new Pen(accent, 1.2f);
+            g.FillRectangle(bgBrush, rect);
+            g.DrawRectangle(acPen, rect.X, rect.Y, rect.Width, rect.Height);
+            g.DrawString(text, font, brush, px, py);
+        }
     }
 }

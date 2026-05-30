@@ -8,6 +8,13 @@
 
 // bundle flag. Validates before submitting to TransactionService.
 
+// What does this file do
+// the "Record New Purchase" modal. Three dropdowns (item, player, character class) plus a bundle checkbox.
+// When submitted, calls TransactionService.RecordPurchase(). Shows a live price preview when an item is selected
+
+// OOP concept
+// Encapsulation via the private ComboItemWrapper inner class —
+// it hides the item ID from the dropdown display, only exposing the human-readable name to the user.
 
 namespace GGG_MAS.Forms
 {
